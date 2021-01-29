@@ -1,13 +1,14 @@
+import datetime
+import math
+import os
+import shutil
+
+import numpy as np
 import torch
 import torchvision
-import zoo
 import wandb
-import os
-import numpy as np
-import math
-import shutil
-import datetime
-from torch.utils.tensorboard import SummaryWriter
+
+import zoo
 
 HPP_DEFAULT = dict(
     batch_size=128,
