@@ -129,6 +129,7 @@ dmypy.json
 .pyre/
 
 ## PYCHARM
+.idea/
 
 # User-specific stuff
 .idea/**/workspace.xml
