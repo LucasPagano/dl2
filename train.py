@@ -13,7 +13,7 @@ import wandb
 import zoo
 
 HPP_DEFAULT = dict(
-    batch_size=128,
+    batch_size=2,
     val_batch_size=256,
     epochs=150,
     lr=5e-4,
@@ -92,7 +92,7 @@ for epoch in range(1, config.epochs + 1):
             reconstructed, mu, logvar = model(batch_images)
             val_loss = model.get_loss(reconstructed, batch_images, mu, logvar)
             total_val_loss += val_loss
-            total_val_mse += mse(reconstructed, batch_images)
+            total_val_mse += mse(reconstructed.view(-1, 32 * 32), batch_images.view(-1, 32 * 32))
         if total_val_loss < best_val_loss:
             best_val_loss = total_val_loss
 
