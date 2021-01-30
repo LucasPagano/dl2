@@ -56,7 +56,6 @@ class BVAE(nn.Module):
             nn.Sigmoid()
         )
         self.weight_init()
-
     def weight_init(self):
         for block in self._modules:
             for m in self._modules[block]:

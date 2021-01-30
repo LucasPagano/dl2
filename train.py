@@ -2,6 +2,8 @@ import datetime
 import math
 import os
 import shutil
+from pathlib import Path
+
 
 import numpy as np
 import torch
@@ -27,14 +29,11 @@ run = wandb.init(project="wandb-demo", config=HPP_DEFAULT)
 config = wandb.config
 print(config)
 torch.manual_seed(config.seed)
-np.seed(config.seed)
+np.random.seed(config.seed)
 
 ### WANDB
 # rename run folder
-model_name = config.model_name
-folder_name = datetime.date.today().strftime("%y-%m-%d_") + datetime.datetime.now().strftime("%H:%M:%S_") + model_name
-if model_name == "BVAE":
-    folder_name += "-b{}_".format(config.beta) + "z{}".format(config.latent_size)
+folder_name = "BVAE-b{}_".format(config.beta) + "z{}".format(config.latent_size)
 run.name = folder_name
 
 use_cuda = not config.no_cuda and torch.cuda.is_available()
@@ -46,8 +45,9 @@ kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
 model = zoo.BVAE(beta=config.beta, z_dim=config.latent_size).to(device)
 wandb.watch(model, log="all")
 
-shutil.rmtree(os.path.join("./models", folder_name), ignore_errors=True)
-os.mkdir(os.path.join("./models", folder_name))
+model_dir = os.path.join("./models", folder_name)
+shutil.rmtree(model_dir, ignore_errors=True)
+Path(model_dir).mkdir(parents=True, exist_ok=True)
 optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
 transform = torchvision.transforms.Compose([
     torchvision.transforms.Resize((32, 32)),
@@ -116,3 +116,4 @@ for epoch in range(1, config.epochs + 1):
             to_log["images/epoch{}_outputs".format(epoch)] = wandb.Image(img_grid_outputs_test)
 
     wandb.log(to_log)
+
