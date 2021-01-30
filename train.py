@@ -61,7 +61,7 @@ train_loader = torch.utils.data.DataLoader(
     train_set, batch_size=config.batch_size, shuffle=True, **kwargs
 )
 val_loader = torch.utils.data.DataLoader(
-    val_set, batch_size=config.val_batch_size, shuffle=False, **kwargs
+    val_set, batch_size=config.val_batch_size, shuffle=True, **kwargs
 )
 best_val_loss = math.inf
 
