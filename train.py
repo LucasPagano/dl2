@@ -107,7 +107,7 @@ for epoch in range(1, config.epochs + 1):
         # plot images
         if epoch % 10 == 0:
             print("Epoch {}/{}".format(epoch, config.epochs))
-            batch_images, classes, reconstructed = batch_images[:4, :, :], classes[:4], reconstructed[:4, :, :]
+            batch_images, reconstructed = batch_images[:4, :, :], reconstructed[:4, :, :]
             img_grid_inputs_test = torchvision.utils.make_grid(batch_images)
             img_grid_outputs_test = torchvision.utils.make_grid(reconstructed.view(-1, 32, 32).unsqueeze(1))
 
