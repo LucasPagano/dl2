@@ -40,7 +40,9 @@ class BVAE(nn.Module):
             Conv2DReLU(64, 128, kernel_size=4, stride=2, padding=1),  # (B, 64, 8, 8) -> (B, 128, 4, 4)
             Conv2DReLU(128, 256, kernel_size=4, stride=1),  # (B, 128, 4, 4) -> (B, 256, 1, 1)
             View((-1, 256)),
-            nn.Linear(256, z_dim * 2),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.Linear(256, z_dim * 2)
         )
         self.decoder = nn.Sequential(
             nn.Linear(z_dim, 256),
