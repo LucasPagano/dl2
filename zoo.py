@@ -42,12 +42,19 @@ class BVAE(nn.Module):
             View((-1, 256)),
             nn.Linear(256, 256),
             nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
             nn.Linear(256, z_dim * 2)
         )
+        self.weight_init()
         self.decoder = nn.Sequential(
             nn.Linear(z_dim, 256),
-            View((-1, 256, 1, 1)),
             nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            nn.Linear(256, 256),
+            nn.ReLU(),
+            View((-1, 256, 1, 1)),
             nn.ConvTranspose2d(256, 64, 4),  # (B, 256, 1, 1) -> (B, 64, 4, 4)
             nn.ReLU(),
             nn.ConvTranspose2d(64, 64, 4, 2, 1),  # (B, 64, 4, 4) -> (B, 64, 8, 8)
@@ -57,7 +64,6 @@ class BVAE(nn.Module):
             nn.ConvTranspose2d(32, nc, 4, 2, 1),  # (B, 32, 16, 16) -> (B, nc, 32, 32)
             nn.Sigmoid()
         )
-        self.weight_init()
     def weight_init(self):
         for block in self._modules:
             for m in self._modules[block]:
