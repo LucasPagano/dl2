@@ -12,7 +12,7 @@ from datasets import MNISTDataModule
 
 HPP_DEFAULT = dict(
     batch_size=2,
-    val_batch_size=256,
+    val_batch_size=2,
     epochs=150,
     lr=5e-4,
     no_cuda=False,
@@ -45,6 +45,8 @@ shutil.rmtree(model_dir, ignore_errors=True)
 Path(model_dir).mkdir(parents=True, exist_ok=True)
 
 ## Pytorch Lightning
-trainer = pl.Trainer()
+wandb_logger = pl.loggers.WandbLogger()
+trainer = pl.Trainer(logger=wandb_logger)
 data_module = MNISTDataModule(config)
 trainer.fit(model, data_module)
+

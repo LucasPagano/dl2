@@ -103,14 +103,14 @@ class BVAE(pl.LightningModule):
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.config.lr)
 
-    def training_step(self, batch_idx, train_batch):
+    def training_step(self, train_batch, batch_idx):
         batch_images, classes = train_batch
         x_recon, mu, log_var = self.forward(batch_images)
         loss = self.get_loss(x_recon, batch_images, mu, log_var)
         self.log("Loss/train", loss)
         return loss
 
-    def validation_step(self, batch_idx, val_batch):
+    def validation_step(self, val_batch, batch_idx):
         batch_images, classes = val_batch
         x_recon, mu, log_var = self.forward(batch_images)
         loss = self.get_loss(x_recon, batch_images, mu, log_var)
