@@ -34,14 +34,21 @@ transform = transforms.Compose([
                          std=[0.229, 0.224, 0.225])
 ])
 
+mean = [0.485, 0.456, 0.406]
+std = [0.229, 0.224, 0.225]
+std_inv = 1 / std
+mean_inv = -mean * std_inv
+unorm = transforms.Normalize(mean=mean_inv, std=std_inv)
+
 dataset = Cityscapes('./datasets/Cityscapes/', split='val', mode='fine',
                      target_type='semantic', transform=transform)
 
 data_iter = iter(dataset)
-do = True
+to_log = 5
+cpt = 0
 for data, gt in data_iter:
-    if do:
-        original_image = np.moveaxis((data.data * 255).numpy().astype(np.uint8), 0, -1)
+    if cpt < to_log:
+        original_image = np.moveaxis((unorm(data.data) * 255).numpy().astype(np.uint8), 0, -1)
         gt = np.array(gt).astype(np.uint8)
 
         batch_images = data.to(device)
@@ -49,7 +56,7 @@ for data, gt in data_iter:
         out = fcn(batch_images.unsqueeze(0))["out"][0]
         predictions = out.argmax(0).cpu().numpy().astype(np.uint8)
 
-        to_log = {"seg" : wb_mask(bg_img=original_image, pred_mask=predictions, true_mask=gt)}
+        to_log = {"seg": wb_mask(bg_img=original_image, pred_mask=predictions, true_mask=gt)}
         wandb.log(to_log)
-        do = False
+        cpt += 1
 print("Done!")
