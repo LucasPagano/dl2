@@ -35,9 +35,10 @@ transform = transforms.Compose([
 ])
 
 mean = [0.485, 0.456, 0.406]
+m_mean = [-i for i in mean]
 std = [0.229, 0.224, 0.225]
-std_inv = 1 / std
-mean_inv = -mean * std_inv
+std_inv = [1 / i for i in std]
+mean_inv = m_mean * std_inv
 unorm = transforms.Normalize(mean=mean_inv, std=std_inv)
 
 dataset = Cityscapes('./datasets/Cityscapes/', split='val', mode='fine',
