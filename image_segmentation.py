@@ -24,9 +24,11 @@ use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 fcn = models.segmentation.fcn_resnet101(pretrained=True).eval().to(device)
 
-classes = ['__background__', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
-           'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike',
-           'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
+segmentation_classes = [
+    'road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'traffic light',
+    'traffic sign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car',
+    'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'void'
+]
 
 transform = transforms.Compose([
     transforms.ToTensor(),
