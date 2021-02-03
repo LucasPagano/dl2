@@ -38,6 +38,3 @@ class MNISTDataModule(pl.LightningDataModule):
         return torch.utils.data.DataLoader(
             self.test_set, batch_size=self.config.batch_size, shuffle=False, **self.args_dloader
         )
-
-    def transfer_batch_to_device(self, batch: Any, device: torch.device) -> Any:
-        return batch.to(self.device)
