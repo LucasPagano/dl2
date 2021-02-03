@@ -98,7 +98,7 @@ class BVAE(pl.LightningModule):
         # mse = torch.nn.MSELoss()(recon_x.view(x.size()), x)
         kld = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
         # divide by batch size
-        return (bce + kld * self.beta) / x.size(0)
+        return (bce + kld * self.config.beta) / x.size(0)
 
     def configure_optimizers(self):
         return torch.optim.Adam(self.parameters(), lr=self.config.lr)
