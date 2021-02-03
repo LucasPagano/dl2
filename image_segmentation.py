@@ -47,7 +47,7 @@ for data, gt in data_iter:
         batch_images = data.to(device)
 
         out = fcn(batch_images.unsqueeze(0))["out"][0]
-        predictions = out.argmax(0)
+        predictions = out.argmax(0).detach().numpy().astype(np.uint8)
 
         to_log = wb_mask(bg_img=original_image, pred_mask=predictions.detach().numpy(), true_mask=gt)
 
