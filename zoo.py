@@ -107,12 +107,12 @@ class BVAE(pl.LightningModule):
         batch_images, classes = train_batch
         x_recon, mu, log_var = self.forward(batch_images)
         loss = self.get_loss(x_recon, batch_images, mu, log_var)
-        self.log("Loss/train", loss)
+        self.log("Loss/train", loss, on_step=False, on_epoch=True, sync_dist=True)
         return loss
 
     def validation_step(self, val_batch, batch_idx):
         batch_images, classes = val_batch
         x_recon, mu, log_var = self.forward(batch_images)
         loss = self.get_loss(x_recon, batch_images, mu, log_var)
-        self.log("Loss/val", loss)
+        self.log("Loss/val", loss, on_step=False, on_epoch=True, sync_dist=True)
         return loss

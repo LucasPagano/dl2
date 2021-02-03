@@ -46,7 +46,7 @@ Path(model_dir).mkdir(parents=True, exist_ok=True)
 
 ## Pytorch Lightning
 wandb_logger = pl.loggers.WandbLogger()
-trainer = pl.Trainer(logger=wandb_logger)
+trainer = pl.Trainer(gpus=-1, logger=wandb_logger)
 data_module = MNISTDataModule(config)
 trainer.fit(model, data_module)
 
