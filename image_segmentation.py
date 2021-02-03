@@ -50,5 +50,6 @@ for data, gt in data_iter:
         predictions = out.argmax(0).cpu().numpy().astype(np.uint8)
 
         to_log = wb_mask(bg_img=original_image, pred_mask=predictions, true_mask=gt)
-
+        wandb.log(to_log)
         do = False
+print("Done!")
