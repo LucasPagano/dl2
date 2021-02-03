@@ -29,5 +29,5 @@ for data, image in data_iter:
     if cpt < 1:
         batch_images = data.to(device)
         out = fcn(batch_images.unsqueeze(0))
-        print("coucou")
+        print(out.size())
         cpt += 1
