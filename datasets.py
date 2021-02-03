@@ -20,9 +20,9 @@ class MNISTDataModule(pl.LightningDataModule):
             torchvision.transforms.Resize((32, 32)),
             torchvision.transforms.ToTensor(),
             torchvision.transforms.Normalize((0.1307,), (0.3081,))])
-        dataset = torchvision.datasets.MNIST("./models", train=True, download=True, transform=transform)
+        dataset = torchvision.datasets.MNIST("./datasets/MNIST", train=True, download=True, transform=transform)
         self.train_set, self.val_set = torch.utils.data.random_split(dataset, [50000, 10000])
-        self.test_set = torchvision.datasets.MNIST("./models", train=False, download=True, transform=transform)
+        self.test_set = torchvision.datasets.MNIST("./datasets/MNIST", train=False, download=True, transform=transform)
 
     def train_dataloader(self, *args, **kwargs) -> DataLoader:
         return torch.utils.data.DataLoader(
