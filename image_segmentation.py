@@ -5,7 +5,7 @@ from torchvision import models, transforms
 from torchvision.datasets import Cityscapes
 
 
-def labels():
+def labels(classes):
     l = {}
     for i, label in enumerate(classes):
         l[i] = label
@@ -14,8 +14,8 @@ def labels():
 
 def wb_mask(bg_img, pred_mask, true_mask):
     return wandb.Image(bg_img, masks={
-        "prediction": {"mask_data": pred_mask, "class_labels": labels()},
-        "ground truth": {"mask_data": true_mask, "class_labels": labels()}})
+        "prediction": {"mask_data": pred_mask, "class_labels": labels(classes_out)},
+        "ground truth": {"mask_data": true_mask, "class_labels": labels(classes_gt)}})
 
 
 ## wandb
@@ -24,9 +24,15 @@ use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 fcn = models.segmentation.fcn_resnet101(pretrained=True).eval().to(device)
 
-classes = ['__background__', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
-           'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike',
-           'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
+classes_out = ['__background__', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle', 'bus',
+               'car', 'cat', 'chair', 'cow', 'diningtable', 'dog', 'horse', 'motorbike',
+               'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
+
+classes_gt = [
+    'road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'traffic light',
+    'traffic sign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car',
+    'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'void'
+]
 
 transform = transforms.Compose([
     transforms.ToTensor(),
