@@ -41,8 +41,8 @@ data_iter = iter(dataset)
 do = True
 for data, gt in data_iter:
     if do:
-        original_image = (data.data * 255).numpy().astype(np.uint8)
-        gt = np.moveaxis(np.array(gt).astype(np.uint8), 0, -1)
+        original_image = np.moveaxis((data.data * 255).numpy().astype(np.uint8), 0, -1)
+        gt = np.array(gt).astype(np.uint8)
 
         batch_images = data.to(device)
 
