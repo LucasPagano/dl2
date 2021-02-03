@@ -24,7 +24,7 @@ use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 fcn = models.segmentation.fcn_resnet101(pretrained=True).eval().to(device)
 
-segmentation_classes = [
+classes = [
     'road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'traffic light',
     'traffic sign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car',
     'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'void'
