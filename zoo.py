@@ -88,7 +88,7 @@ class BVAE(pl.LightningModule):
 
     def forward(self, x):
         encoded = self.encode(x)
-        mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
+        mu, log_var = encoded[:, :self.latent_size], encoded[:, self.latent_size:]
         z = self.sampling(mu, log_var)
         x_recon = self.decode(z)
         return x_recon, mu, log_var
