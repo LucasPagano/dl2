@@ -30,6 +30,7 @@ for data, image in data_iter:
         batch_images = data.to(device)
         out = fcn(batch_images.unsqueeze(0))
         for key, value in out.items():
+            print(key)
             print(value)
             try:
                 print(value.size())
