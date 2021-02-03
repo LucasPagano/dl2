@@ -43,6 +43,7 @@ for data, image in data_iter:
     if cpt < 1:
         batch_images = data.to(device)
         print(batch_images)
+        print(batch_images.size())
         out = fcn(batch_images.unsqueeze(0))
         for key, value in out.items():
             print(key)
@@ -51,5 +52,5 @@ for data, image in data_iter:
                 print(value.size())
             except:
                 pass
-        to_log = wb_mask(batch_images)
+        # to_log = wb_mask(batch_images)
         cpt += 1
