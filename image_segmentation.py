@@ -38,19 +38,17 @@ dataset = Cityscapes('./datasets/Cityscapes/', split='val', mode='fine',
                      target_type='semantic', transform=transform)
 
 data_iter = iter(dataset)
-cpt = 0
-for data, image in data_iter:
-    if cpt < 1:
+do = True
+for data, gt in data_iter:
+    if do:
+        original_image = (data.data * 255).numpy().astype(np.uint8)
+        gt = (gt.data * 255).numpy().astype(np.uint8)
+
         batch_images = data.to(device)
-        print(batch_images)
-        print(batch_images.size())
-        out = fcn(batch_images.unsqueeze(0))
-        for key, value in out.items():
-            print(key)
-            print(value)
-            try:
-                print(value.size())
-            except:
-                pass
-        # to_log = wb_mask(batch_images)
-        cpt += 1
+
+        out = fcn(batch_images.unsqueeze(0))["out"][0]
+        predictions = out.argmax(0)
+
+        to_log = wb_mask(bg_img=original_image, pred_mask=predictions, true_mask=gt)
+
+        do = False
