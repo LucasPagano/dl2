@@ -45,10 +45,10 @@ dataset = Cityscapes('./datasets/Cityscapes/', split='val', mode='fine',
                      target_type='semantic', transform=transform)
 
 data_iter = iter(dataset)
-to_log = 5
+log_nb = 5
 cpt = 0
 for data, gt in data_iter:
-    if cpt < to_log:
+    if cpt < log_nb:
         original_image = np.moveaxis((unorm(data.data) * 255).numpy().astype(np.uint8), 0, -1)
         gt = np.array(gt).astype(np.uint8)
 
