@@ -29,9 +29,10 @@ classes_out = ['__background__', 'aeroplane', 'bicycle', 'bird', 'boat', 'bottle
                'person', 'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor']
 
 classes_gt = [
-    'road', 'sidewalk', 'building', 'wall', 'fence', 'pole', 'traffic light',
-    'traffic sign', 'vegetation', 'terrain', 'sky', 'person', 'rider', 'car',
-    'truck', 'bus', 'train', 'motorcycle', 'bicycle', 'void'
+    'unlabeled', 'ego vehicle', 'rectification border', 'out of roi', 'static', 'dynamic', 'ground',
+    'road', 'sidewalk', 'parking', 'rail track', 'building', 'wall', 'fence',
+    'guard rail', 'bridge', 'tunnel', 'pole', 'polegroup', 'traffic light', 'traffic sign', 'vegetation', 'terrain',
+    'sky', 'person', 'rider', 'car', 'bus', 'caravan', 'trailer', 'train', 'motorcycle', 'bicycle', 'license plate'
 ]
 
 transform = transforms.Compose([
@@ -54,16 +55,17 @@ data_iter = iter(dataset)
 log_nb = 5
 cpt = 0
 for data, gt in data_iter:
-    if cpt < log_nb:
-        original_image = np.moveaxis((unorm(data.data) * 255).numpy().astype(np.uint8), 0, -1)
-        gt = np.array(gt).astype(np.uint8)
+    if
+cpt < log_nb:
+original_image = np.moveaxis((unorm(data.data) * 255).numpy().astype(np.uint8), 0, -1)
+gt = np.array(gt).astype(np.uint8)
 
-        batch_images = data.to(device)
+batch_images = data.to(device)
 
-        out = fcn(batch_images.unsqueeze(0))["out"][0]
-        predictions = out.argmax(0).cpu().numpy().astype(np.uint8)
+out = fcn(batch_images.unsqueeze(0))["out"][0]
+predictions = out.argmax(0).cpu().numpy().astype(np.uint8)
 
-        to_log = {"seg": wb_mask(bg_img=original_image, pred_mask=predictions, true_mask=gt)}
-        wandb.log(to_log)
-        cpt += 1
+to_log = {"seg": wb_mask(bg_img=original_image, pred_mask=predictions, true_mask=gt)}
+wandb.log(to_log)
+cpt += 1
 print("Done!")
