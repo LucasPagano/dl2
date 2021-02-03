@@ -1,4 +1,5 @@
 import torch
+import pytorch_lightning as pl
 import torch.nn.functional as F
 from torch import nn
 from torch.nn import init
@@ -23,19 +24,15 @@ class Conv2DReLU(nn.Module):
         return self.relu(self.conv(x))
 
 
-class BVAE(nn.Module):
-    def __init__(self, beta=None, z_dim=10, nc=1):
+class BVAE(pl.LightningModule):
+    def __init__(self, config):
         super(BVAE, self).__init__()
         self.name = "BVAE"
-        if beta is None:
-            self.beta = 1
-        else:
-            self.beta = beta
-        self.z_dim = z_dim
+        self.config = config
 
         self.encoder = nn.Sequential(
 
-            Conv2DReLU(nc, 32, kernel_size=4, stride=2, padding=1),  # (B, nc, 32, 32) -> (B, 32, 16, 16)
+            Conv2DReLU(config.nc, 32, kernel_size=4, stride=2, padding=1),  # (B, nc, 32, 32) -> (B, 32, 16, 16)
             Conv2DReLU(32, 64, kernel_size=4, stride=2, padding=1),  # (B, 32, 32, 32) -> (B, 64, 8, 8)
             Conv2DReLU(64, 128, kernel_size=4, stride=2, padding=1),  # (B, 64, 8, 8) -> (B, 128, 4, 4)
             Conv2DReLU(128, 256, kernel_size=4, stride=1),  # (B, 128, 4, 4) -> (B, 256, 1, 1)
@@ -44,11 +41,10 @@ class BVAE(nn.Module):
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
-            nn.Linear(256, z_dim * 2)
+            nn.Linear(256, config.latent_size * 2)
         )
-        self.weight_init()
         self.decoder = nn.Sequential(
-            nn.Linear(z_dim, 256),
+            nn.Linear(config.latent_size, 256),
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
@@ -61,9 +57,12 @@ class BVAE(nn.Module):
             nn.ReLU(),
             nn.ConvTranspose2d(64, 32, 4, 2, 1),  # (B, 64, 8, 8) -> (B, 32, 16, 16)
             nn.ReLU(),
-            nn.ConvTranspose2d(32, nc, 4, 2, 1),  # (B, 32, 16, 16) -> (B, nc, 32, 32)
+            nn.ConvTranspose2d(32, config.nc, 4, 2, 1),  # (B, 32, 16, 16) -> (B, nc, 32, 32)
             nn.Sigmoid()
         )
+
+        self.weight_init()
+
     def weight_init(self):
         for block in self._modules:
             for m in self._modules[block]:
@@ -100,3 +99,20 @@ class BVAE(nn.Module):
         kld = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
         # divide by batch size
         return (bce + kld * self.beta) / x.size(0)
+
+    def configure_optimizers(self):
+        return torch.optim.Adam(self.parameters(), lr=self.config.lr)
+
+    def training_step(self, batch_idx, train_batch):
+        batch_images, classes = train_batch
+        x_recon, mu, log_var = self.forward(batch_images)
+        loss = self.get_loss(x_recon, batch_images, mu, log_var)
+        self.log("Loss/train", loss)
+        return loss
+
+    def validation_step(self, batch_idx, val_batch):
+        batch_images, classes = val_batch
+        x_recon, mu, log_var = self.forward(batch_images)
+        loss = self.get_loss(x_recon, batch_images, mu, log_var)
+        self.log("Loss/val", loss)
+        return loss
