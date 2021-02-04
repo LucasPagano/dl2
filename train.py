@@ -13,7 +13,7 @@ import wandb
 import zoo
 
 HPP_DEFAULT = dict(
-    batch_size=2,
+    batch_size=512,
     val_batch_size=256,
     epochs=150,
     lr=5e-4,
