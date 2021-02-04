@@ -1,5 +1,3 @@
-import copy
-import datetime
 import math
 import os
 import shutil
@@ -114,10 +112,9 @@ for epoch in range(1, config.epochs + 1):
 
             ### WANDB
             images_to_log = [wandb.Image(img_grid_inputs_test), wandb.Image(img_grid_outputs_test)]
-            to_log["images/epoch{}".format(epoch)] = copy.deepcopy(images_to_log)
+            to_log["images/epoch{}".format(epoch)] = images_to_log
             log_images.extend(images_to_log)
 
     wandb.log(to_log)
-
 print(log_images)
 wandb.log({"img_all": log_images})
