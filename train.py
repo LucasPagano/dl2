@@ -4,7 +4,6 @@ import os
 import shutil
 from pathlib import Path
 
-
 import numpy as np
 import torch
 import torchvision
@@ -65,6 +64,7 @@ val_loader = torch.utils.data.DataLoader(
 )
 best_val_loss = math.inf
 
+log_images = []
 # training
 for epoch in range(1, config.epochs + 1):
     total_train_loss = 0
@@ -112,8 +112,9 @@ for epoch in range(1, config.epochs + 1):
             img_grid_outputs_test = torchvision.utils.make_grid(reconstructed.view(-1, 32, 32).unsqueeze(1))
 
             ### WANDB
-            to_log["images/inputs"] = wandb.Image(img_grid_inputs_test)
-            to_log["images/outputs"] = wandb.Image(img_grid_outputs_test)
-
+            to_log["images/epoch{}_inputs".format(epoch)] = wandb.Image(img_grid_inputs_test)
+            to_log["images/epoch{}_outputs".format(epoch)] = wandb.Image(img_grid_outputs_test)
+            log_images.append(img_grid_inputs_test)
+            log_images.append(img_grid_outputs_test)
     wandb.log(to_log)
-
+wandb.log({"img_all": log_images})
