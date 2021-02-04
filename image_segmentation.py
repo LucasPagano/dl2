@@ -66,5 +66,6 @@ for data, gt in data_iter:
         predictions = out.argmax(0).cpu().numpy().astype(np.uint8)
         mask_list.append(wb_mask(bg_img=original_image, pred_mask=predictions, true_mask=gt))
         cpt += 1
-
+    else:
+        break
 wandb.log({"predictions": mask_list})
