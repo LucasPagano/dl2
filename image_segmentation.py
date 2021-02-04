@@ -54,8 +54,8 @@ dataset = Cityscapes('./datasets/Cityscapes/', split='val', mode='fine',
 data_iter = iter(dataset)
 log_nb = 5
 cpt = 0
+mask_list = []
 for data, gt in data_iter:
-    mask_list = []
     if cpt < log_nb:
         original_image = np.moveaxis((unorm(data.data) * 255).numpy().astype(np.uint8), 0, -1)
         gt = np.array(gt).astype(np.uint8)
@@ -67,4 +67,4 @@ for data, gt in data_iter:
         mask_list.append(wb_mask(bg_img=original_image, pred_mask=predictions, true_mask=gt))
         cpt += 1
 
-    wandb.log({"predictions": mask_list})
+wandb.log({"predictions": mask_list})
