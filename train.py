@@ -112,8 +112,7 @@ for epoch in range(1, config.epochs + 1):
             img_grid_outputs_test = torchvision.utils.make_grid(reconstructed.view(-1, 32, 32).unsqueeze(1))
 
             ### WANDB
-            to_log["images/epoch{}_inputs".format(epoch)] = wandb.Image(img_grid_inputs_test)
-            to_log["images/epoch{}_outputs".format(epoch)] = wandb.Image(img_grid_outputs_test)
+            to_log["images/epoch{}".format(epoch)] = [wandb.Image(img_grid_inputs_test), wandb.Image(img_grid_inputs_test)]
             log_images.append(img_grid_inputs_test)
             log_images.append(img_grid_outputs_test)
     wandb.log(to_log)
