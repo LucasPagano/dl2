@@ -1,3 +1,4 @@
+import copy
 import datetime
 import math
 import os
@@ -112,9 +113,11 @@ for epoch in range(1, config.epochs + 1):
             img_grid_outputs_test = torchvision.utils.make_grid(reconstructed.view(-1, 32, 32).unsqueeze(1))
 
             ### WANDB
-            to_log["images/epoch{}".format(epoch)] = [wandb.Image(img_grid_inputs_test), wandb.Image(img_grid_outputs_test)]
-            log_images.append([wandb.Image(img_grid_inputs_test), wandb.Image(img_grid_outputs_test)])
+            images_to_log = [wandb.Image(img_grid_inputs_test), wandb.Image(img_grid_outputs_test)]
+            to_log["images/epoch{}".format(epoch)] = copy.deepcopy(images_to_log)
+            log_images.append(images_to_log)
 
     wandb.log(to_log)
+
 print(log_images)
 wandb.log({"img_all": log_images})
