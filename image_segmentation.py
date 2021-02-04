@@ -67,4 +67,4 @@ for data, gt in data_iter:
         mask_list.append(wb_mask(bg_img=original_image, pred_mask=predictions, true_mask=gt))
         cpt += 1
 
-    wandb.log(mask_list)
+    wandb.log({"predictions": mask_list})
