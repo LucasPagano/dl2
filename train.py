@@ -14,7 +14,7 @@ import zoo
 HPP_DEFAULT = dict(
     batch_size=512,
     val_batch_size=256,
-    epochs=150,
+    epochs=50,
     lr=5e-4,
     no_cuda=False,
     seed=42,
@@ -116,4 +116,5 @@ for epoch in range(1, config.epochs + 1):
             log_images.append([wandb.Image(img_grid_inputs_test), wandb.Image(img_grid_outputs_test)])
 
     wandb.log(to_log)
+print(log_images)
 wandb.log({"img_all": log_images})
