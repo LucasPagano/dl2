@@ -6,9 +6,20 @@ from pathlib import Path
 import numpy as np
 import torch
 import torchvision
-import wandb
 
 import zoo
+
+
+def get_optimizer(conf, nn):
+    if conf.optimizer == "Adam":
+        opt = torch.optim.Adam(nn.parameters(), lr=conf.lr)
+    elif conf.optimizer == "RMSprop":
+        opt = torch.optim.RMSprop(nn.parameters(), lr=conf.lr)
+    elif conf.optimizer == "SGD":
+        opt = torch.optim.SGD(nn.parameters(), lr=conf.lr)
+    return opt
+
+import wandb
 
 HPP_DEFAULT = dict(
     batch_size=512,
@@ -18,7 +29,8 @@ HPP_DEFAULT = dict(
     no_cuda=False,
     seed=42,
     beta=4,
-    latent_size=10
+    latent_size=10,
+    optimizer="Adam"
 )
 
 ### WANDB
@@ -46,7 +58,8 @@ wandb.watch(model, log="all")
 model_dir = os.path.join("./models", folder_name)
 shutil.rmtree(model_dir, ignore_errors=True)
 Path(model_dir).mkdir(parents=True, exist_ok=True)
-optimizer = torch.optim.Adam(model.parameters(), lr=config.lr)
+optimizer = get_optimizer(config, model)
+
 transform = torchvision.transforms.Compose([
     torchvision.transforms.Resize((32, 32)),
     torchvision.transforms.ToTensor()])
@@ -116,4 +129,5 @@ for epoch in range(1, config.epochs + 1):
             log_images.extend(images_to_log)
 
     wandb.log(to_log)
+
 wandb.log({"img_all": log_images})
