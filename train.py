@@ -7,6 +7,7 @@ import numpy as np
 import torch
 import torchvision
 
+import wandb
 import zoo
 
 
@@ -19,7 +20,6 @@ def get_optimizer(conf, nn):
         opt = torch.optim.SGD(nn.parameters(), lr=conf.lr)
     return opt
 
-import wandb
 
 HPP_DEFAULT = dict(
     batch_size=512,
@@ -83,6 +83,8 @@ for epoch in range(1, config.epochs + 1):
     model.train()
     for batch_images, _ in train_loader:
         optimizer.zero_grad()
+        ## TODO : assert that 0 <= batch images <= 1
+        print(batch_images.size(), batch_images.min(), batch_images.max())
         batch_images = batch_images.to(device)
         reconstructed, mu, logvar = model(batch_images)
         train_loss = model.get_loss(reconstructed, batch_images, mu, logvar)
