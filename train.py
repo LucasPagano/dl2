@@ -86,7 +86,7 @@ for epoch in range(1, config.epochs + 1):
         batch_images = batch_images.to(device)
         reconstructed, mu, logvar = model(batch_images)
         train_loss = model.get_loss(reconstructed, batch_images, mu, logvar)
-        total_train_loss += train_loss
+        total_train_loss += train_loss / reconstructed.size(0)
         train_loss.backward()
         optimizer.step()
 
@@ -104,7 +104,7 @@ for epoch in range(1, config.epochs + 1):
             reconstructed, mu, logvar = model(batch_images)
 
             val_loss = model.get_loss(reconstructed, batch_images, mu, logvar)
-            total_val_loss += val_loss
+            total_val_loss += val_loss / reconstructed.size(0)
             total_val_mse += mse(reconstructed.view(-1, 32 * 32), batch_images.view(-1, 32 * 32))
         if total_val_loss < best_val_loss:
             best_val_loss = total_val_loss
