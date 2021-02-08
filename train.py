@@ -62,7 +62,10 @@ optimizer = get_optimizer(config, model)
 
 transform = torchvision.transforms.Compose([
     torchvision.transforms.Resize((32, 32)),
-    torchvision.transforms.ToTensor()])
+    torchvision.transforms.ToTensor(),
+    torchvision.transforms.Normalize(
+        (0.1307,), (0.3081,))
+])
 
 dataset = torchvision.datasets.MNIST(
     root="./datasets/", train=True, transform=transform, download=True
@@ -83,7 +86,6 @@ for epoch in range(1, config.epochs + 1):
     model.train()
     for batch_images, _ in train_loader:
         optimizer.zero_grad()
-        ## TODO : assert that 0 <= batch images <= 1
         print(batch_images.size(), batch_images.min(), batch_images.max())
         batch_images = batch_images.to(device)
         reconstructed, mu, logvar = model(batch_images)
