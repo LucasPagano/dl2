@@ -85,8 +85,6 @@ for epoch in range(1, config.epochs + 1):
         optimizer.zero_grad()
         batch_images = batch_images.to(device)
         reconstructed, mu, logvar = model(batch_images)
-        print("Input : [{}; {}]".format(batch_images.min(), batch_images.max()))
-        print("Reconstructed : [{}; {}]".format(reconstructed.min(), reconstructed.max()))
         train_loss = model.get_loss(reconstructed, batch_images, mu, logvar)
         total_train_loss += train_loss
         train_loss.backward()

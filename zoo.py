@@ -89,10 +89,8 @@ class BVAE(nn.Module):
 
     def forward(self, x):
         encoded = self.encode(x)
-        print("Encoded : [{}; {}]".format(encoded.min(), encoded.max()))
         mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
         z = self.sampling(mu, log_var)
-        print("z : [{}; {}]".format(z.min(), z.max()))
         x_recon = self.decode(z)
         return x_recon, mu, log_var
 
