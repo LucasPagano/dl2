@@ -1,5 +1,8 @@
 import math
 import os
+
+os.environ["CUDA_LAUNCH_BLOCKING"] = 1
+
 import shutil
 from pathlib import Path
 
@@ -62,10 +65,7 @@ optimizer = get_optimizer(config, model)
 
 transform = torchvision.transforms.Compose([
     torchvision.transforms.Resize((32, 32)),
-    torchvision.transforms.ToTensor(),
-    torchvision.transforms.Normalize(
-        (0.1307,), (0.3081,))
-])
+    torchvision.transforms.ToTensor()])
 
 dataset = torchvision.datasets.MNIST(
     root="./datasets/", train=True, transform=transform, download=True
@@ -86,9 +86,10 @@ for epoch in range(1, config.epochs + 1):
     model.train()
     for batch_images, _ in train_loader:
         optimizer.zero_grad()
-        print(batch_images.size(), batch_images.min(), batch_images.max())
         batch_images = batch_images.to(device)
         reconstructed, mu, logvar = model(batch_images)
+        print("Input : [{}; {}]".format(batch_images.min(), batch_images.max()))
+        print("Reconstructed : [{}; {}]".format(reconstructed.min(), reconstructed.max()))
         train_loss = model.get_loss(reconstructed, batch_images, mu, logvar)
         total_train_loss += train_loss
         train_loss.backward()
@@ -106,6 +107,7 @@ for epoch in range(1, config.epochs + 1):
         for batch_images, _ in val_loader:
             batch_images = batch_images.to(device)
             reconstructed, mu, logvar = model(batch_images)
+
             val_loss = model.get_loss(reconstructed, batch_images, mu, logvar)
             total_val_loss += val_loss
             total_val_mse += mse(reconstructed.view(-1, 32 * 32), batch_images.view(-1, 32 * 32))
