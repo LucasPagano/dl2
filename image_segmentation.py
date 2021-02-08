@@ -4,6 +4,8 @@ import numpy as np
 from torchvision import models, transforms
 from torchvision.datasets import Cityscapes
 
+from utils import get_unorm
+
 
 def labels(classes):
     l = {}
@@ -41,12 +43,7 @@ transform = transforms.Compose([
                          std=[0.229, 0.224, 0.225])
 ])
 
-mean = [0.485, 0.456, 0.406]
-m_mean = [-i for i in mean]
-std = [0.229, 0.224, 0.225]
-std_inv = [1 / i for i in std]
-mean_inv = [i * j for i, j in zip(m_mean, std_inv)]
-unorm = transforms.Normalize(mean=mean_inv, std=std_inv)
+unorm = get_unorm(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
 
 dataset = Cityscapes('./datasets/Cityscapes/', split='val', mode='fine',
                      target_type='semantic', transform=transform)
