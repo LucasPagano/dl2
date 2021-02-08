@@ -1,8 +1,5 @@
 import math
 import os
-
-os.environ["CUDA_LAUNCH_BLOCKING"] = 1
-
 import shutil
 from pathlib import Path
 
