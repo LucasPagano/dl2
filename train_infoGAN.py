@@ -28,3 +28,5 @@ kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
 
 model = zoo.InfoGAN(config).to(device)
 wandb.watch(model, log="all")
+for param in model.parameters():
+    print(param.data.mean(), param.data.std())
