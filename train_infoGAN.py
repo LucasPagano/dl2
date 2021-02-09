@@ -77,7 +77,7 @@ for epoch in range(config.epochs):
         loss_real.backward()
 
         # fake part
-        z, idx = utils.noise_sample(dis_c, con_c, noise, bs)
+        z, idx = utils.noise_sample(dis_c, con_c, noise, config.batch_size)
         fake_x = infoGAN.generator(z)
         fe_out2 = infoGAN.q_disc_front_end(fake_x.detach())
         probs_fake = infoGAN.discriminate(fe_out2)
