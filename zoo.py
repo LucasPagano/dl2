@@ -175,6 +175,9 @@ class InfoGAN(nn.Module):
 
             return disc_logits, mu, var
 
+    def discriminate(self, x):
+        return self.discriminator_head(x).view(-1, 1)
+
     def weights_init(self, m):
         classname = m.__class__.__name__
         if classname.find('Conv') != -1:
@@ -188,6 +191,3 @@ class InfoGAN(nn.Module):
                 (x - mu).pow(2).div(var.mul(2.0) + 1e-6)
 
         return logli.sum(1).mean().mul(-1)
-
-    def forward(self, x):
-        pass
