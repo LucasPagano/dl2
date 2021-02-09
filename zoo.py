@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from torch.nn import init
+import numpy as np
 
 
 class View(nn.Module):
@@ -181,3 +182,12 @@ class InfoGAN(nn.Module):
         elif classname.find('BatchNorm') != -1:
             m.weight.data.normal_(1.0, 0.02)
             m.bias.data.fill_(0)
+
+    def log_gaussian(self, x, mu, var):
+        logli = -0.5 * (var.mul(2 * np.pi) + 1e-6).log() - \
+                (x - mu).pow(2).div(var.mul(2.0) + 1e-6)
+
+        return logli.sum(1).mean().mul(-1)
+
+    def forward(self, x):
+        pass
