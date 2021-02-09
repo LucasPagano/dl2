@@ -64,6 +64,7 @@ class BVAE(nn.Module):
             nn.ConvTranspose2d(32, nc, 4, 2, 1),  # (B, 32, 16, 16) -> (B, nc, 32, 32)
             nn.Sigmoid()
         )
+
     def weight_init(self):
         for block in self._modules:
             for m in self._modules[block]:
@@ -99,4 +100,84 @@ class BVAE(nn.Module):
         # mse = torch.nn.MSELoss()(recon_x.view(x.size()), x)
         kld = -0.5 * torch.sum(1 + log_var - mu.pow(2) - log_var.exp())
         # divide by batch size
-        return (bce + kld * self.beta)
+        return bce + kld * self.beta
+
+
+class InfoGAN(nn.Module):
+
+    def __init__(self, config):
+        super(InfoGAN, self).__init__()
+        self.name = "InfoGAN"
+        self.generator = self.Generator(config)
+        self.q_disc_front_end = self.FrontEnd(config)
+        self.discriminator_head = nn.Sequential(
+            nn.Conv2d(1024, 1, 1),
+            nn.Sigmoid()
+        ).apply(self.weights_init)
+        self.q_head = self.QHead(config)
+        self.apply(self.weights_init)
+
+    class Generator(nn.Module):
+        def __init__(self, config):
+            super().__init__()
+            self.main = self.generator = nn.Sequential(
+                nn.ConvTranspose2d(74, 1024, 1, 1, bias=False),
+                nn.BatchNorm2d(1024),
+                nn.ReLU(True),
+                nn.ConvTranspose2d(1024, 128, 7, 1, bias=False),
+                nn.BatchNorm2d(128),
+                nn.ReLU(True),
+                nn.ConvTranspose2d(128, 64, 4, 2, 1, bias=False),
+                nn.BatchNorm2d(64),
+                nn.ReLU(True),
+                nn.ConvTranspose2d(64, 1, 4, 2, 1, bias=False),
+                nn.Sigmoid())
+
+        def forward(self, x):
+            return self.main(x)
+
+    # Front end for discriminator and Q
+    class FrontEnd(nn.Module):
+        def __init__(self, config):
+            super().__init__()
+            self.main = nn.Sequential(
+                nn.Conv2d(1, 64, 4, 2, 1),
+                nn.LeakyReLU(0.1, inplace=True),
+                nn.Conv2d(64, 128, 4, 2, 1, bias=False),
+                nn.BatchNorm2d(128),
+                nn.LeakyReLU(0.1, inplace=True),
+                nn.Conv2d(128, 1024, 7, bias=False),
+                nn.BatchNorm2d(1024),
+                nn.LeakyReLU(0.1, inplace=True),
+            )
+
+        def forward(self, x):
+            return self.main(x)
+
+    class QHead(nn.Module):
+        def __init__(self, config):
+            super().__init__()
+            self.conv = nn.Conv2d(1024, 128, 1, bias=False)
+            self.bn = nn.BatchNorm2d(128)
+            self.lReLU = nn.LeakyReLU(0.1, inplace=True)
+            self.conv_disc = nn.Conv2d(128, 10, 1)
+            self.conv_mu = nn.Conv2d(128, 2, 1)
+            self.conv_var = nn.Conv2d(128, 2, 1)
+
+        def forward(self, x):
+            y = self.conv(x)
+
+            disc_logits = self.conv_disc(y).squeeze()
+
+            mu = self.conv_mu(y).squeeze()
+            var = self.conv_var(y).squeeze().exp()
+
+            return disc_logits, mu, var
+
+    def weights_init(self, m):
+        classname = m.__class__.__name__
+        if classname.find('Conv') != -1:
+            m.weight.data.normal_(0.0, 0.02)
+        elif classname.find('BatchNorm') != -1:
+            m.weight.data.normal_(1.0, 0.02)
+            m.bias.data.fill_(0)

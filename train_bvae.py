@@ -61,7 +61,7 @@ Path(model_dir).mkdir(parents=True, exist_ok=True)
 optimizer = get_optimizer(config, model)
 
 transform = torchvision.transforms.Compose([
-    torchvision.transforms.Resize((32, 32)),
+    torchvision.transforms.Resize((28, 28)),
     torchvision.transforms.ToTensor()])
 
 dataset = torchvision.datasets.MNIST(
