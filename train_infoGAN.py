@@ -65,6 +65,8 @@ for epoch in range(config.epochs):
     total_G_loss = 0
     total_D_loss = 0
     for num_iters, batch_data in enumerate(dataloader, 0):
+
+        ## Discriminator part : maximize log(D(x)) + log(1 - D(G(z)))
         # real part
         optimD.zero_grad()
 
@@ -91,7 +93,8 @@ for epoch in range(config.epochs):
 
         optimD.step()
 
-        # G and Q part
+        ## G and Q part
+        # only fake : trivial for G, Q : can only do during fake bc codes aren't known during real
         optimG.zero_grad()
 
         fe_out = infoGAN.q_disc_front_end(fake_x)
@@ -118,20 +121,20 @@ for epoch in range(config.epochs):
         "Loss/G": total_G_loss / len(dataloader),
         "Loss/D": total_D_loss / len(dataloader),
     }
+    # log images every 10 epochs
+    if epoch % 10 == 0:
+        noise.data.copy_(fix_noise)
+        dis_c.data.copy_(torch.Tensor(one_hot))
+        con_c.data.copy_(torch.from_numpy(c1))
+        z1 = torch.cat([noise, dis_c, con_c], 1).view(-1, 74, 1, 1)
+        con_c.data.copy_(torch.from_numpy(c2))
+        z2 = torch.cat([noise, dis_c, con_c], 1).view(-1, 74, 1, 1)
+        with torch.no_grad():
+            x_save1 = infoGAN.generator(z1)
+            x_save2 = infoGAN.generator(z2)
+        grid1 = wandb.Image(torchvision.utils.make_grid(x_save1, nrow=10))
+        grid2 = wandb.Image(torchvision.utils.make_grid(x_save2, nrow=10))
 
-    noise.data.copy_(fix_noise)
-    dis_c.data.copy_(torch.Tensor(one_hot))
-
-    con_c.data.copy_(torch.from_numpy(c1))
-    z1 = torch.cat([noise, dis_c, con_c], 1).view(-1, 74, 1, 1)
-    con_c.data.copy_(torch.from_numpy(c2))
-    z2 = torch.cat([noise, dis_c, con_c], 1).view(-1, 74, 1, 1)
-    with torch.no_grad():
-        x_save1 = infoGAN.generator(z1)
-        x_save2 = infoGAN.generator(z2)
-    grid1 = wandb.Image(torchvision.utils.make_grid(x_save1, nrow=10))
-    grid2 = wandb.Image(torchvision.utils.make_grid(x_save2, nrow=10))
-
-    to_log["images/epoch{}_c1".format(epoch)] = grid1
-    to_log["images/epoch{}_c2".format(epoch)] = grid2
+        to_log["images/epoch{}_c1".format(epoch)] = grid1
+        to_log["images/epoch{}_c2".format(epoch)] = grid2
     wandb.log(to_log)
