@@ -123,9 +123,15 @@ for epoch in range(config.epochs):
     dis_c.data.copy_(torch.Tensor(one_hot))
 
     con_c.data.copy_(torch.from_numpy(c1))
-    z = torch.cat([noise, dis_c, con_c], 1).view(-1, 74, 1, 1)
+    z1 = torch.cat([noise, dis_c, con_c], 1).view(-1, 74, 1, 1)
+    con_c.data.copy_(torch.from_numpy(c2))
+    z2 = torch.cat([noise, dis_c, con_c], 1).view(-1, 74, 1, 1)
     with torch.no_grad():
-        x_save = infoGAN.generator(z)
-    grid = wandb.Image(torchvision.utils.make_grid(x_save, nrow=10))
-    to_log["images/epoch{}".format(epoch)] = grid
+        x_save1 = infoGAN.generator(z1)
+        x_save2 = infoGAN.generator(z2)
+    grid1 = wandb.Image(torchvision.utils.make_grid(x_save1, nrow=10))
+    grid2 = wandb.Image(torchvision.utils.make_grid(x_save2, nrow=10))
+
+    to_log["images/epoch{}_c1".format(epoch)] = grid1
+    to_log["images/epoch{}_c2".format(epoch)] = grid2
     wandb.log(to_log)
