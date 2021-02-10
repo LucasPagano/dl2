@@ -55,9 +55,9 @@ c = np.repeat(c, 10, 0).reshape(-1, 1)
 c1 = np.hstack([c, np.zeros_like(c)])
 c2 = np.hstack([np.zeros_like(c), c])
 idx = np.arange(10).repeat(10)
-one_hot = np.zeros((100, 10))
-one_hot[range(100), idx] = 1
-fix_noise = torch.Tensor(100, 62).uniform_(-1, 1)
+one_hot = np.zeros((config.batch_size, 10))
+one_hot[range(config.batch_size), idx] = 1
+fix_noise = torch.Tensor(config.batch_size, 62).uniform_(-1, 1)
 
 for epoch in range(config.epochs):
     print("Epoch {}/{}".format(epoch, config.epochs))
