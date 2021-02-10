@@ -124,7 +124,7 @@ for epoch in range(config.epochs):
 
     con_c.data.copy_(torch.from_numpy(c1))
     z = torch.cat([noise, dis_c, con_c], 1).view(-1, 74, 1, 1)
-    with torch.no_grad:
+    with torch.no_grad():
         x_save = infoGAN.generator(z)
     grid = wandb.Image(torchvision.utils.make_grid(x_save, nrow=10))
     to_log["images/epoch{}".format(epoch)] = grid
