@@ -11,6 +11,7 @@ import wandb
 import zoo
 
 HPP_DEFAULT = dict(
+    lambda_loss=0.1,
     batch_size=100,
     val_batch_size=256,
     epochs=100,
@@ -107,7 +108,7 @@ for epoch in range(config.epochs):
         class_ = torch.LongTensor(idx).to(device)
         target = Variable(class_)
         dis_loss = criterionQ_dis(q_logits, target)
-        con_loss = criterionQ_con(con_c, q_mu, q_var) * 0.1
+        con_loss = criterionQ_con(con_c, q_mu, q_var) * config.lambda_loss
 
         G_loss = reconstruct_loss + dis_loss + con_loss
         total_G_loss += G_loss
