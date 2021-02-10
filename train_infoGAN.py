@@ -100,7 +100,7 @@ for epoch in range(config.epochs):
 
         fe_out = infoGAN.q_disc_front_end(fake_x)
         probs_fake = infoGAN.discriminate(fe_out)
-        label.data.fill_(1.0)
+        label.data.fill_(0)
 
         reconstruct_loss = criterionD(probs_fake, label)
 
