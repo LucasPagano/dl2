@@ -37,7 +37,7 @@ optimG = optim.Adam([{'params': infoGAN.generator.parameters()}, {'params': info
                     betas=(0.5, 0.99))
 
 dataset = torchvision.datasets.MNIST('./datasets', transform=transforms.ToTensor(), download=True)
-dataloader = DataLoader(dataset, batch_size=config.batch_size, shuffle=True, num_workers=1)
+dataloader = DataLoader(dataset, batch_size=config.batch_size, drop_last=True, shuffle=True, **kwargs)
 
 criterionD = nn.BCELoss()
 criterionQ_dis = nn.CrossEntropyLoss()
@@ -68,7 +68,6 @@ for epoch in range(config.epochs):
         optimD.zero_grad()
 
         x, _ = batch_data
-        print(x.size())
 
         real_x.data.copy_(x)
         fe_out1 = infoGAN.q_disc_front_end(real_x)
