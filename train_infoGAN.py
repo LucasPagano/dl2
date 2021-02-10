@@ -68,6 +68,7 @@ for epoch in range(config.epochs):
         optimD.zero_grad()
 
         x, _ = batch_data
+        print(x.size())
 
         real_x.data.copy_(x)
         fe_out1 = infoGAN.q_disc_front_end(real_x)
