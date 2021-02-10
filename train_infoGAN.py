@@ -11,7 +11,7 @@ import wandb
 import zoo
 
 HPP_DEFAULT = dict(
-    batch_size=128,
+    batch_size=100,
     val_batch_size=256,
     epochs=100,
     no_cuda=False,
@@ -50,6 +50,7 @@ con_c = Variable(torch.FloatTensor(config.batch_size, 2).to(device))
 noise = Variable(torch.FloatTensor(config.batch_size, 62).to(device))
 
 # fixed random variables
+## due to the size of idx, batch size has to be 100
 c = np.linspace(-1, 1, 10).reshape(1, -1)
 c = np.repeat(c, 10, 0).reshape(-1, 1)
 c1 = np.hstack([c, np.zeros_like(c)])
