@@ -61,6 +61,7 @@ one_hot = np.zeros((config.batch_size, 10))
 one_hot[range(config.batch_size), idx] = 1
 fix_noise = torch.Tensor(config.batch_size, 62).uniform_(-1, 1)
 
+images_log_all = []
 for epoch in range(config.epochs):
     print("Epoch {}/{}".format(epoch, config.epochs))
     total_G_loss = 0
@@ -139,4 +140,7 @@ for epoch in range(config.epochs):
 
         to_log["images/epoch{}_c1".format(epoch)] = grid1
         to_log["images/epoch{}_c2".format(epoch)] = grid2
+        images_log_all.extend([grid1, grid2])
     wandb.log(to_log)
+wandb.log({"img_all": images_log_all})
+
