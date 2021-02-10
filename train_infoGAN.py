@@ -96,11 +96,12 @@ for epoch in range(config.epochs):
 
         ## G and Q part
         # only fake : trivial for G, Q : can only do during fake bc codes aren't known during real
+        # fake data is treated as real (label is 1)
         optimG.zero_grad()
 
         fe_out = infoGAN.q_disc_front_end(fake_x)
         probs_fake = infoGAN.discriminate(fe_out)
-        label.data.fill_(0)
+        label.data.fill_(1)
 
         reconstruct_loss = criterionD(probs_fake, label)
 
