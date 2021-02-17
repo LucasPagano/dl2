@@ -28,3 +28,34 @@ def noise_sample(dis_c, con_c, noise, bs):
     noise.data.uniform_(-1.0, 1.0)
     z = torch.cat([noise, dis_c, con_c], 1).view(-1, 74, 1, 1)
     return z, idx
+
+
+def get_latent_steps(nb_epochs, latent_size, nb_cuts_latent):
+    """Return a dictionary matching the epoch to the latent size to be trained"""
+    assert nb_cuts_latent <= latent_size
+
+    step_latent = latent_size // nb_cuts_latent
+    first_latent = step_latent + latent_size % nb_cuts_latent
+
+    step_epoch = nb_epochs // nb_cuts_latent
+    first_epoch = step_epoch + nb_epochs % nb_cuts_latent
+
+    size_latent = first_latent
+    epoch_stop = first_epoch
+    epoch_dict = {}
+    for e in range(nb_epochs):
+        if e < epoch_stop:
+            epoch_dict[e] = size_latent
+        else:
+            size_latent += step_latent
+            epoch_stop += step_epoch
+            epoch_dict[e] = size_latent
+
+    return epoch_dict
+
+
+if __name__ == "__main__":
+    print(get_latent_steps(15, 5, 3))
+    print(get_latent_steps(15, 10, 3))
+    print(get_latent_steps(8, 2, 2))
+    print(get_latent_steps(8, 50, 4))
