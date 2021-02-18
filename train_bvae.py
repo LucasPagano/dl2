@@ -78,14 +78,13 @@ val_loader = torch.utils.data.DataLoader(
 )
 best_val_loss = math.inf
 
-
 epoch_latent_dict = get_latent_steps(config.epochs, config.latent_size, config.nb_cuts_latent)
 log_images = []
 # training
 for epoch in range(1, config.epochs + 1):
     total_train_loss = 0
     model.train()
-    index_latent = epoch_latent_dict[epoch]
+    index_latent = epoch_latent_dict[epoch - 1]
     for batch_images, _ in train_loader:
         optimizer.zero_grad()
         batch_images = batch_images.to(device)
