@@ -54,7 +54,7 @@ kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
 
 ### WANDB
 # plot model graph
-model = zoo.BVAE(beta=config.beta, z_dim=config.latent_size).to(device)
+model = zoo.BVAE(config).to(device)
 wandb.watch(model, log="all")
 
 model_dir = os.path.join("./models", folder_name)

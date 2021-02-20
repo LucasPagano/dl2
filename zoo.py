@@ -25,14 +25,18 @@ class Conv2DReLU(nn.Module):
 
 
 class BVAE(nn.Module):
-    def __init__(self, beta=None, z_dim=10, nc=1):
+    def __init__(self, config):
         super(BVAE, self).__init__()
         self.name = "BVAE"
-        if beta is None:
+        if config.beta is None:
             self.beta = 1
         else:
-            self.beta = beta
-        self.z_dim = z_dim
+            self.beta = config.beta
+        self.z_dim = config.latent_size
+        if "nc" in config.keys():
+            nc = config.nc
+        else:
+            nc = 1
 
         self.encoder = nn.Sequential(
 
