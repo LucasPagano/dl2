@@ -12,12 +12,12 @@ run_id = "ekfhsifu"
 
 wandb.init(project="eval-vae", entity="lucas_p")
 
-
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 api = wandb.Api()
 run = api.run("lucas_p/wandb-demo/{}".format(run_id))
 config = Dotdict(run.config)
+print(config)
 
 model = BVAE(config).to(device).eval()
 model.load_state_dict(torch.load("./models/{}/model.pt".format(run_id)))
