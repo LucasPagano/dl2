@@ -25,6 +25,7 @@ def get_optimizer(conf, nn):
 HPP_DEFAULT = dict(
     batch_size=512,
     val_batch_size=256,
+    clipping_gradient_value=5,
     epochs=150,
     lr=5e-4,
     no_cuda=False,
@@ -55,6 +56,8 @@ kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
 # plot model graph
 model = zoo.BVAE(config).to(device)
 wandb.watch(model, log="all")
+# clip value of gradient
+torch.nn.utils.clip_grad_norm(model.parameters(), config.clipping_gradient_value)
 
 folder_name = run.id
 model_dir = os.path.join("./models", folder_name)
@@ -114,12 +117,10 @@ for epoch in range(1, config.epochs + 1):
         if total_val_loss < best_val_loss:
             best_val_loss = total_val_loss
 
-            # WandB – Save the model checkpoint. This automatically saves a file to the cloud and associates it with the current run.
             torch.save(model.state_dict(), os.path.join(model_dir, "model.pt"))
             to_log["best_val"] = total_val_loss / len(val_loader)
             to_log["best_mse"] = total_val_mse / len(val_loader)
 
-        ### WANDB
         to_log["Loss/val"] = total_val_loss / len(val_loader)
         to_log["Mse/val"] = total_val_mse / len(val_loader)
 
