@@ -27,8 +27,8 @@ test_latents_c1 = np.random.uniform(low=-1, high=1, size=(config.latent_size, 10
 test_latents_c2 = copy.copy(test_latents_c1)
 test_latents_c1[0] = np.linspace(-1, 1, 10)
 test_latents_c2[1] = np.linspace(-1, 1, 10)
-test_latents_c1 = torch.FloatTensor(test_latents_c1).permute(1, 0)
-test_latents_c2 = torch.FloatTensor(test_latents_c2).permute(1, 0)
+test_latents_c1 = torch.FloatTensor(test_latents_c1).permute(1, 0).to(device)
+test_latents_c2 = torch.FloatTensor(test_latents_c2).permute(1, 0).to(device)
 with torch.no_grad():
     x_save1 = model.decode(test_latents_c1)
     x_save2 = model.decode(test_latents_c2)
