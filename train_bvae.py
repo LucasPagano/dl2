@@ -79,6 +79,7 @@ val_loader = torch.utils.data.DataLoader(
 best_val_loss = math.inf
 
 epoch_latent_dict = get_latent_steps(config.epochs, config.latent_size, config.nb_cuts_latent)
+print(epoch_latent_dict)
 log_images = []
 # training
 for epoch in range(1, config.epochs + 1):
