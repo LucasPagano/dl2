@@ -116,6 +116,8 @@ for epoch in range(1, config.epochs + 1):
             # WandB – Save the model checkpoint. This automatically saves a file to the cloud and associates it with the current run.
             torch.save(model.state_dict(), os.path.join(model_dir, "model.pt"))
             wandb.save(os.path.join(run.dir, "model_wandb.pt"))
+            to_log["best_val"] = total_val_loss / len(val_loader)
+            to_log["best_mse"] = total_val_mse / len(val_loader)
 
         ### WANDB
         to_log["Loss/val"] = total_val_loss / len(val_loader)
