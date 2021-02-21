@@ -45,8 +45,7 @@ np.random.seed(config.seed)
 
 ### WANDB
 # rename run folder
-folder_name = "BVAE-b{}_".format(config.beta) + "z{}".format(config.latent_size)
-run.name = folder_name
+run.name = "BVAE-b{}_".format(config.beta) + "z{}".format(config.latent_size) + "_{}".format(run.id)
 
 use_cuda = not config.no_cuda and torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
@@ -57,6 +56,7 @@ kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
 model = zoo.BVAE(config).to(device)
 wandb.watch(model, log="all")
 
+folder_name = run.id
 model_dir = os.path.join("./models", folder_name)
 shutil.rmtree(model_dir, ignore_errors=True)
 Path(model_dir).mkdir(parents=True, exist_ok=True)
@@ -114,8 +114,8 @@ for epoch in range(1, config.epochs + 1):
             best_val_loss = total_val_loss
 
             # WandB – Save the model checkpoint. This automatically saves a file to the cloud and associates it with the current run.
-            torch.save(model.state_dict(), os.path.join("./models", folder_name + ".pt"))
-            wandb.save(os.path.join("./models", folder_name + ".pt"))
+            torch.save(model.state_dict(), os.path.join(model_dir, "model.pt"))
+            wandb.save(os.path.join(run.dir, "model_wandb.pt"))
 
         ### WANDB
         to_log["Loss/val"] = total_val_loss / len(val_loader)

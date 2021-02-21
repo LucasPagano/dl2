@@ -49,11 +49,11 @@ class BVAE(nn.Module):
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
-            nn.Linear(256, z_dim * 2)
+            nn.Linear(256, self.z_dim * 2)
         )
         self.weight_init()
         self.decoder = nn.Sequential(
-            nn.Linear(z_dim, 256),
+            nn.Linear(self.z_dim, 256),
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),

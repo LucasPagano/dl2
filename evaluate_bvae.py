@@ -2,20 +2,28 @@ import torch
 import torchvision
 import matplotlib.pyplot as plt
 import wandb
+from utils import Dotdict
 
 from zoo import BVAE
 import numpy as np
 import copy
 
+run_id = "ekfhsifu"
+
 wandb.init(project="eval-vae", entity="lucas_p")
 
-z_dim = 16
 
-model = BVAE(z_dim=z_dim, beta=27).eval()
-model.load_state_dict(torch.load("./models/BVAE-b27_z16.pt"))
+use_cuda = torch.cuda.is_available()
+device = torch.device("cuda" if use_cuda else "cpu")
+api = wandb.Api()
+run = api.run("lucas_p/wandb-demo/{}".format(run_id))
+config = Dotdict(run.config)
+
+model = BVAE(config).to(device).eval()
+model.load_state_dict(torch.load("./models/BVAE-b{}_z{}_{}/model.pt".format(config.beta, config.latent_size, run_id)))
 
 # test two first channels
-test_latents_c1 = np.random.uniform(low=-1, high=1, size=(z_dim, 10))
+test_latents_c1 = np.random.uniform(low=-1, high=1, size=(config.latent_dim, 10))
 test_latents_c2 = copy.copy(test_latents_c1)
 test_latents_c1[0] = np.linspace(-1, 1, 10)
 test_latents_c2[1] = np.linspace(-1, 1, 10)
