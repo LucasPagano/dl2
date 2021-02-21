@@ -23,7 +23,7 @@ model = BVAE(config).to(device).eval()
 model.load_state_dict(torch.load("./models/{}/model.pt".format(run_id)))
 
 # test two first channels
-test_latents_c1 = np.random.uniform(low=-1, high=1, size=(config.latent_dim, 10))
+test_latents_c1 = np.random.uniform(low=-1, high=1, size=(config.latent_size, 10))
 test_latents_c2 = copy.copy(test_latents_c1)
 test_latents_c1[0] = np.linspace(-1, 1, 10)
 test_latents_c2[1] = np.linspace(-1, 1, 10)
