@@ -35,8 +35,8 @@ for i in range(nb_examples):
     with torch.no_grad():
         x_save1 = model.decode(test_latents_c1)
         x_save2 = model.decode(test_latents_c2)
-    all_img["c1"].extend(torchvision.utils.make_grid(x_save1, nrow=10))
-    all_img["c2"].extend(torchvision.utils.make_grid(x_save2, nrow=10))
+    all_img["c1"].append(torchvision.utils.make_grid(x_save1, nrow=10))
+    all_img["c2"].append(torchvision.utils.make_grid(x_save2, nrow=10))
 
 grid1 = wandb.Image(torchvision.utils.make_grid(all_img["c1"], nrow=10))
 grid2 = wandb.Image(torchvision.utils.make_grid(all_img["c2"], nrow=10))
