@@ -24,12 +24,12 @@ model = BVAE(config).to(device).eval()
 model.load_state_dict(torch.load("./models/{}/model.pt".format(run_id)))
 
 # test two first channels
-test_latents_c1 = np.random.normal(size=(config.latent_size, nb_examples))
+test_latents_c1 = np.random.normal(size=(config.latent_size, 10))
 test_latents_c2 = copy.copy(test_latents_c1)
 test_latents_c1[0] = np.linspace(-1, 1, 10)
 test_latents_c2[1] = np.linspace(-1, 1, 10)
-test_latents_c1 = np.repeat(test_latents_c1, 10, axis=0)
-test_latents_c2 = np.repeat(test_latents_c1, 10, axis=0)
+test_latents_c1 = np.repeat(test_latents_c1, nb_examples, axis=0)
+test_latents_c2 = np.repeat(test_latents_c1, nb_examples, axis=0)
 test_latents_c1 = torch.FloatTensor(test_latents_c1).permute(1, 0).to(device)
 test_latents_c2 = torch.FloatTensor(test_latents_c2).permute(1, 0).to(device)
 with torch.no_grad():
