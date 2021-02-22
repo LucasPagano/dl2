@@ -39,7 +39,7 @@ for i in range(nb_examples):
     all_img["c1"].append(torchvision.utils.make_grid(x_save1, nrow=10))
     all_img["c2"].append(torchvision.utils.make_grid(x_save2, nrow=10))
 
-grid1 = wandb.Image(torchvision.utils.make_grid(all_img["c1"], nrow=10))
+grid1 = wandb.Image(torchvision.utils.make_grid(torch.cat(all_img["c1"]), nrow=10))
 grid2 = wandb.Image(torchvision.utils.make_grid(all_img["c2"], nrow=10))
 
 logdict = {"i1": grid1, "i2": grid2}
