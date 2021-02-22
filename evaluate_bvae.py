@@ -30,10 +30,11 @@ test_latents_c2[1] = np.linspace(-1, 1, 10)
 test_latents_c1 = torch.FloatTensor(test_latents_c1).permute(1, 0).to(device)
 test_latents_c2 = torch.FloatTensor(test_latents_c2).permute(1, 0).to(device)
 with torch.no_grad():
-    x_save1 = model.decode(test_latents_c1).squeeze()
-    x_save2 = model.decode(test_latents_c2).squeeze()
+    x_save1 = model.decode(test_latents_c1)
+    x_save2 = model.decode(test_latents_c2)
 
 grid1 = wandb.Image(torchvision.utils.make_grid(x_save1, nrow=10))
+print(grid1)
 grid2 = wandb.Image(torchvision.utils.make_grid(x_save2, nrow=10))
 logdict = {"i1": grid1, "i2": grid2}
 wandb.log(logdict)
