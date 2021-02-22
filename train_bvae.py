@@ -9,18 +9,7 @@ import torchvision
 
 import wandb
 import zoo
-from utils import get_latent_steps
-
-
-def get_optimizer(conf, nn):
-    if conf.optimizer == "Adam":
-        opt = torch.optim.Adam(nn.parameters(), lr=conf.lr)
-    elif conf.optimizer == "RMSprop":
-        opt = torch.optim.RMSprop(nn.parameters(), lr=conf.lr)
-    elif conf.optimizer == "SGD":
-        opt = torch.optim.SGD(nn.parameters(), lr=conf.lr)
-    return opt
-
+from utils import get_latent_steps, get_optimizer
 
 HPP_DEFAULT = dict(
     batch_size=512,
@@ -57,7 +46,7 @@ kwargs = {'num_workers': 4, 'pin_memory': True} if use_cuda else {}
 model = zoo.BVAE(config).to(device)
 wandb.watch(model, log="all")
 # clip value of gradient
-torch.nn.utils.clip_grad_norm(model.parameters(), config.clipping_gradient_value)
+torch.nn.utils.clip_grad_norm_(model.parameters(), config.clipping_gradient_value)
 
 folder_name = run.id
 model_dir = os.path.join("./models", folder_name)

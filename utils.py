@@ -3,6 +3,16 @@ import numpy as np
 import torch
 
 
+def get_optimizer(conf, nn):
+    if conf.optimizer == "Adam":
+        opt = torch.optim.Adam(nn.parameters(), lr=conf.lr)
+    elif conf.optimizer == "RMSprop":
+        opt = torch.optim.RMSprop(nn.parameters(), lr=conf.lr)
+    elif conf.optimizer == "SGD":
+        opt = torch.optim.SGD(nn.parameters(), lr=conf.lr)
+    return opt
+
+
 def get_unorm(mean, std):
     """
     Returns a transform to undo a normalization, useful for visualization
