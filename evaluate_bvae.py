@@ -8,7 +8,7 @@ from zoo import BVAE
 import numpy as np
 import copy
 
-run_id = "p0zusi04"
+run_id = "2zcslu3i"
 nb_examples = 5
 
 wandb.init(project="eval-vae", entity="lucas_p")
@@ -21,7 +21,9 @@ config = Dotdict(run.config)
 print(config)
 
 state = torch.load("./models/{}/model.pt".format(run_id))
+# Iterative training
 config.latent_size = state["index_latent"]
+print("Best epoch : {}".format(state["epoch"]))
 model = BVAE(config).to(device).eval()
 model.load_state_dict(state["state_dict"])
 
