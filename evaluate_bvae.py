@@ -21,6 +21,7 @@ config = Dotdict(run.config)
 print(config)
 
 state = torch.load("./models/{}/model.pt".format(run_id))
+print(state)
 # Iterative training
 config.latent_size = state["index_latent"]
 print("Best epoch : {}".format(state["epoch"]))
