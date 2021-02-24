@@ -100,10 +100,7 @@ class BVAE(nn.Module):
         x_recon = self.decode(z)
         return x_recon, mu, log_var
 
-    def get_loss(self, recon_x, x, mu, log_var, latent_index):
-        # cut for incremental training
-        mu = mu[:, :latent_index]
-        log_var = log_var[:, :latent_index]
+    def get_loss(self, recon_x, x, mu, log_var):
         bce = F.binary_cross_entropy(recon_x.view(-1, 32 * 32), x.view(-1, 32 * 32))
         # mse = torch.nn.MSELoss()(recon_x.view(x.size()), x)
         kld = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim=1), dim=0)

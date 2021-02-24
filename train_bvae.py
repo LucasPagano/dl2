@@ -21,7 +21,6 @@ HPP_DEFAULT = dict(
     seed=42,
     beta=4,
     latent_size=10,
-    nb_cuts_latent=2,
     optimizer="Adam"
 )
 
@@ -70,19 +69,16 @@ val_loader = torch.utils.data.DataLoader(
 )
 best_val_loss = math.inf
 
-epoch_latent_dict = get_latent_steps(config.epochs, config.latent_size, config.nb_cuts_latent)
-print(epoch_latent_dict)
 log_images = []
 # training
 for epoch in range(1, config.epochs + 1):
     total_train_loss = 0
     model.train()
-    index_latent = epoch_latent_dict[epoch - 1]
     for batch_images, _ in train_loader:
         optimizer.zero_grad()
         batch_images = batch_images.to(device)
         reconstructed, mu, logvar = model(batch_images)
-        train_loss = model.get_loss(reconstructed, batch_images, mu, logvar, index_latent)
+        train_loss = model.get_loss(reconstructed, batch_images, mu, logvar)
         total_train_loss += train_loss / reconstructed.size(0)
         train_loss.backward()
         optimizer.step()
@@ -100,17 +96,15 @@ for epoch in range(1, config.epochs + 1):
             batch_images = batch_images.to(device)
             reconstructed, mu, logvar = model(batch_images)
 
-            val_loss = model.get_loss(reconstructed, batch_images, mu, logvar, index_latent)
+            val_loss = model.get_loss(reconstructed, batch_images, mu, logvar)
             total_val_loss += val_loss / reconstructed.size(0)
             total_val_mse += mse(reconstructed.view(-1, 32 * 32), batch_images.view(-1, 32 * 32))
         if total_val_loss < best_val_loss:
             best_val_loss = total_val_loss
-            state = {
+            torch.save({
                 "epoch": epoch,
                 "state_dict": model.state_dict(),
-                "index_latent": index_latent
-            }
-            torch.save(state, os.path.join(model_dir, "model.pt"))
+            }, os.path.join(model_dir, "model.pt"))
             to_log["best_val"] = total_val_loss / len(val_loader)
             to_log["best_mse"] = total_val_mse / len(val_loader)
 
