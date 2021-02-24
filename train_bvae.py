@@ -105,8 +105,12 @@ for epoch in range(1, config.epochs + 1):
             total_val_mse += mse(reconstructed.view(-1, 32 * 32), batch_images.view(-1, 32 * 32))
         if total_val_loss < best_val_loss:
             best_val_loss = total_val_loss
-
-            torch.save(model.state_dict(), os.path.join(model_dir, "model.pt"))
+            state = {
+                "epoch": epoch,
+                "state_dict": model.state_dict(),
+                "index_latent": index_latent
+            }
+            torch.save(state, os.path.join(model_dir, "model.pt"))
             to_log["best_val"] = total_val_loss / len(val_loader)
             to_log["best_mse"] = total_val_mse / len(val_loader)
 

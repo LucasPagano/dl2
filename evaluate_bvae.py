@@ -20,8 +20,10 @@ run = api.run("lucas_p/wandb-demo/{}".format(run_id))
 config = Dotdict(run.config)
 print(config)
 
+state = torch.load("./models/{}/model.pt".format(run_id))
+config.latent_size = state["index_latent"]
 model = BVAE(config).to(device).eval()
-model.load_state_dict(torch.load("./models/{}/model.pt".format(run_id)))
+model.load_state_dict(state["state_dict"])
 
 # test two first channels
 test_latents_c1 = np.random.normal(size=(config.latent_size, 10))
