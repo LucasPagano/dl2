@@ -105,9 +105,9 @@ class BVAE(nn.Module):
     def unfreeze(self):
         # unfreezes the encoder and decoder
         for param in self.encoder.parameters():
-            param.requires_grad = False
+            param.requires_grad = True
         for param in self.decoder.parameters():
-            param.requires_grad = False
+            param.requires_grad = True
 
     def encode(self, x):
         return self.encoder(x)
