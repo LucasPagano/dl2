@@ -20,7 +20,7 @@ HPP_DEFAULT = dict(
     lr=5e-4,
     no_cuda=False,
     seed=42,
-    beta=4,
+    beta=1,
     latent_size=2,
     optimizer="Adam"
 )
