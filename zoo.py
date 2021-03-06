@@ -61,7 +61,7 @@ class BVAE(nn.Module):
             nn.Linear(256, 128),
             nn.ReLU(),
             nn.Linear(128, self.classes_dim),
-            nn.LogSoftmax()
+            nn.LogSoftmax(dim=1)
         )
 
         self.decoder = nn.Sequential(

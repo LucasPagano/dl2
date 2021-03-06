@@ -29,7 +29,9 @@ model.load_state_dict(state["state_dict"])
 # test two first channels
 # create one_hot for class info in info-vae
 one_hot = np.zeros(10)
+one_hot.fill(1e-10)
 one_hot[np.random.randint(0, 10)] = 1
+one_hot = np.log(one_hot)
 # create latent space and concatenate
 test_latents_c1 = np.zeros(shape=(10, config.latent_size))
 test_latents_c2 = copy.copy(test_latents_c1)
