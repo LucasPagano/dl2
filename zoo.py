@@ -134,7 +134,7 @@ class BVAE(nn.Module):
         kld = -0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp())
         # info-vae part
         ce = F.cross_entropy(classes_pred, classes_real)
-        return bce,  kld * self.beta
+        return bce,  kld * self.beta, ce
 
 
 class InfoGAN(nn.Module):
