@@ -17,11 +17,11 @@ HPP_DEFAULT = dict(
     val_batch_size=256,
     clipping_gradient_value=5,
     epochs=150,
-    lr=5e-4,
+    lr=5e-3,
     no_cuda=False,
     seed=42,
-    beta=1,
-    latent_size=2,
+    beta=2,
+    latent_size=4,
     optimizer="Adam"
 )
 
@@ -87,7 +87,7 @@ for epoch in range(1, config.epochs + 1):
         bce, kld, ce = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
         losses_train["bce"] += bce
         losses_train["kld"] += kld
-        losses_train["ce"] += ce
+        # losses_train["ce"] += ce
         train_loss = bce + kld
         losses_train["total_train"] += train_loss
         train_loss.backward()
@@ -107,7 +107,7 @@ for epoch in range(1, config.epochs + 1):
             bce, kld, ce = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
             losses_val["bce_val"] += bce
             losses_val["kld_val"] += kld
-            losses_val["ce_val"] += ce
+            # losses_val["ce_val"] += ce
             val_loss = bce + kld
             losses_val["total_val"] += val_loss
         if losses_val["total_val"] < best_val_loss:
