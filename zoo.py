@@ -133,7 +133,6 @@ class BVAE(nn.Module):
         # mse = torch.nn.MSELoss()(recon_x.view(x.size()), x)
         kld = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim=1), dim=0)
         # info-vae part
-        print(classes_pred.size())
         ce = F.cross_entropy(classes_pred, classes_real)
         return bce,  kld * self.beta, ce
 
