@@ -22,8 +22,6 @@ print(config)
 
 state = torch.load("./models/{}/model.pt".format(run_id))
 print(state.keys())
-# Iterative training
-config.latent_size = state["index_latent"]
 print("Best epoch : {}".format(state["epoch"]))
 model = BVAE(config).to(device).eval()
 model.load_state_dict(state["state_dict"])
