@@ -82,10 +82,10 @@ for epoch in range(1, config.epochs + 1):
     model.train()
     for batch_images, classes_real in train_loader:
         optimizer.zero_grad()
-        batch_images = batch_images.to(device)
+        batch_images, classes_real = batch_images.to(device), classes_real.to(device)
         reconstructed, mu, logvar, classes_pred = model(batch_images)
         train_loss = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
-        total_train_loss += train_loss / reconstructed.size(0)
+        total_train_loss += train_loss
         train_loss.backward()
         optimizer.step()
 
@@ -103,7 +103,7 @@ for epoch in range(1, config.epochs + 1):
             reconstructed, mu, logvar, classes_pred = model(batch_images)
 
             val_loss = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
-            total_val_loss += val_loss / reconstructed.size(0)
+            total_val_loss += val_loss
             total_val_mse += mse(reconstructed.view(-1, 32 * 32), batch_images.view(-1, 32 * 32))
         if total_val_loss < best_val_loss:
             best_val_loss = total_val_loss
