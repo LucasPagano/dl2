@@ -123,7 +123,7 @@ class BVAE(nn.Module):
     def forward(self, x):
         encoded = self.encode(x)
         mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
-        # classes = self.classifier(x)
+        classes = self.classifier(x)
         z = self.sampling(mu, log_var)
         x_recon = self.decode(z)
         return x_recon, mu, log_var, classes
