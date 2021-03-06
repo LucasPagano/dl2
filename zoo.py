@@ -50,7 +50,7 @@ class BVAE(nn.Module):
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
-            nn.Linear(256, self.z_dim * 2 + self.classes_dim)
+            nn.Linear(256, self.z_dim * 2)
         )
 
         self.classifier = nn.Sequential(
