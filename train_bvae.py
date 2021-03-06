@@ -99,7 +99,7 @@ for epoch in range(1, config.epochs + 1):
         total_val_mse = 0
         mse = torch.nn.MSELoss()
         for batch_images, classes_real in val_loader:
-            batch_images = batch_images.to(device)
+            batch_images, classes_real = batch_images.to(device), classes_real.to(device)
             reconstructed, mu, logvar, classes_pred = model(batch_images)
 
             val_loss = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
