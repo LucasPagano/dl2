@@ -27,6 +27,8 @@ model = BVAE(config).to(device).eval()
 model.load_state_dict(state["state_dict"])
 
 # test two first channels
+one_hot = np.zeros((nb_examples, 10))
+one_hot[:, np.random.randint(0,10)] = 1
 test_latents_c1 = np.random.normal(size=(config.latent_size, 10))
 test_latents_c2 = copy.copy(test_latents_c1)
 test_latents_c1[0] = np.linspace(-1, 1, 10)
@@ -39,8 +41,8 @@ with torch.no_grad():
     x_save1 = model.decode(test_latents_c1)
     x_save2 = model.decode(test_latents_c2)
 
-grid1 = wandb.Image(torchvision.utils.make_grid(x_save1, nrow=10))
-grid2 = wandb.Image(torchvision.utils.make_grid(x_save2, nrow=10))
+grid1 = wandb.Image(torchvision.utils.make_grid(x_save1, nrow=nb_examples))
+grid2 = wandb.Image(torchvision.utils.make_grid(x_save2, nrow=nb_examples))
 
 logdict = {"i1": grid1, "i2": grid2}
 wandb.log(logdict)
