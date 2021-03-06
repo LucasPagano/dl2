@@ -52,6 +52,17 @@ class BVAE(nn.Module):
             nn.ReLU(),
             nn.Linear(256, self.z_dim * 2)
         )
+        self.classifier = nn.Sequential(
+
+            Conv2DReLU(nc, 32, kernel_size=4, stride=2, padding=1),  # (B, nc, 32, 32) -> (B, 32, 16, 16)
+            Conv2DReLU(32, 64, kernel_size=4, stride=2, padding=1),  # (B, 32, 32, 32) -> (B, 64, 8, 8)
+            Conv2DReLU(64, 128, kernel_size=4, stride=2, padding=1),  # (B, 64, 8, 8) -> (B, 128, 4, 4)
+            Conv2DReLU(128, 256, kernel_size=4, stride=1),  # (B, 128, 4, 4) -> (B, 256, 1, 1)
+            View((-1, 256)),
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 10)
+        )
 
         self.decoder = nn.Sequential(
             nn.Linear(self.z_dim, 256),
@@ -112,16 +123,17 @@ class BVAE(nn.Module):
     def forward(self, x):
         encoded = self.encode(x)
         mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
+        classes = self.classifier(x)
         z = self.sampling(mu, log_var)
         x_recon = self.decode(z)
-        return x_recon, mu, log_var
+        return x_recon, mu, log_var, classes
 
-    def get_loss(self, recon_x, x, mu, log_var):
+    def get_loss(self, recon_x, x, mu, log_var, classes_real, classes_pred):
         bce = F.binary_cross_entropy(recon_x.view(-1, 32 * 32), x.view(-1, 32 * 32), reduction="sum")
         # mse = torch.nn.MSELoss()(recon_x.view(x.size()), x)
         kld = -0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp())
         # info-vae part
-        # ce = F.cross_entropy(classes_pred, classes_real)
+        ce = F.cross_entropy(classes_pred, classes_real)
         return bce,  kld * self.beta
 
 

@@ -78,15 +78,17 @@ for epoch in range(1, config.epochs + 1):
     for batch_images, classes_real in train_loader:
         optimizer.zero_grad()
         batch_images, classes_real = batch_images.to(device), classes_real.to(device)
-        reconstructed, mu, logvar = model(batch_images)
-        bce, kld = model.get_loss(reconstructed, batch_images, mu, logvar)
-        losses_train["bce"] += bce
-        losses_train["kld"] += kld
-        # losses_train["ce"] += ce
-        train_loss = bce + kld
-        losses_train["total_train"] += train_loss
+        reconstructed, mu, logvar, classes_pred = model(batch_images)
+        bce, kld, ce = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
+        train_loss = bce + kld + ce
         train_loss.backward()
         optimizer.step()
+
+        # logging
+        losses_train["bce"] += bce
+        losses_train["kld"] += kld
+        losses_train["ce"] += ce
+        losses_train["total_train"] += train_loss
 
     ## WANDB
     to_log = {"Loss/{}".format(k): v / len(train_loader) for k, v in losses_train.items()}
@@ -97,13 +99,13 @@ for epoch in range(1, config.epochs + 1):
         losses_val = defaultdict(lambda: 0, {})
         for batch_images, classes_real in val_loader:
             batch_images, classes_real = batch_images.to(device), classes_real.to(device)
-            reconstructed, mu, logvar = model(batch_images)
+            reconstructed, mu, logvar, classes_pred = model(batch_images)
 
-            bce, kld = model.get_loss(reconstructed, batch_images, mu, logvar)
+            bce, kld, ce = model.get_loss(reconstructed, batch_images, mu, logvar,classes_real, classes_pred)
             losses_val["bce_val"] += bce
             losses_val["kld_val"] += kld
-            # losses_val["ce_val"] += ce
-            val_loss = bce + kld
+            losses_val["ce_val"] += ce
+            val_loss = bce + kld + ce
             losses_val["total_val"] += val_loss
         if losses_val["total_val"] < best_val_loss:
             best_val_loss = losses_val["total_val"]
