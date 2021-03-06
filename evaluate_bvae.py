@@ -27,22 +27,26 @@ model = BVAE(config).to(device).eval()
 model.load_state_dict(state["state_dict"])
 
 # test two first channels
-one_hot = np.zeros((nb_examples, 10))
-one_hot[:, np.random.randint(0,10)] = 1
-test_latents_c1 = np.random.normal(size=(config.latent_size, 10))
+# create one_hot for class info in info-vae
+one_hot = np.zeros(10)
+one_hot[np.random.randint(0, 10)] = 1
+# create latent space and concatenate
+test_latents_c1 = np.zeros(shape=(10, config.latent_size))
 test_latents_c2 = copy.copy(test_latents_c1)
-test_latents_c1[0] = np.linspace(-1, 1, 10)
-test_latents_c2[1] = np.linspace(-1, 1, 10)
-test_latents_c1 = np.repeat(test_latents_c1, nb_examples, axis=0)
-test_latents_c2 = np.repeat(test_latents_c1, nb_examples, axis=0)
-test_latents_c1 = torch.FloatTensor(test_latents_c1).permute(1, 0).to(device)
-test_latents_c2 = torch.FloatTensor(test_latents_c2).permute(1, 0).to(device)
+test_latents_c1[:, 0] = np.linspace(-1, 1, 10)
+test_latents_c2[:, 1] = np.linspace(-1, 1, 10)
+one_hot = np.broadcast_to(one_hot, (10, 10))
+test_latents_c1 = np.hstack((test_latents_c1, one_hot))
+# test_latents_c1 = np.repeat(test_latents_c1, nb_examples, axis=0)
+# test_latents_c2 = np.repeat(test_latents_c1, nb_examples, axis=0)
+test_latents_c1 = torch.FloatTensor(test_latents_c1).to(device)
+test_latents_c2 = torch.FloatTensor(test_latents_c2).to(device)
 with torch.no_grad():
     x_save1 = model.decode(test_latents_c1)
     x_save2 = model.decode(test_latents_c2)
 
-grid1 = wandb.Image(torchvision.utils.make_grid(x_save1, nrow=nb_examples))
-grid2 = wandb.Image(torchvision.utils.make_grid(x_save2, nrow=nb_examples))
+grid1 = wandb.Image(torchvision.utils.make_grid(x_save1, nrow=1))
+grid2 = wandb.Image(torchvision.utils.make_grid(x_save2, nrow=1))
 
 logdict = {"i1": grid1, "i2": grid2}
 wandb.log(logdict)
