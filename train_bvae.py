@@ -73,11 +73,11 @@ best_val_loss = math.inf
 log_images = []
 # training
 for epoch in range(1, config.epochs + 1):
-    if epoch == 1:
-        ## freeze encoder and decoder to help classifier fit before them
-        model.freeze()
-    if epoch == 5:
-        model.unfreeze()
+    # if epoch == 1:
+    #     ## freeze encoder and decoder to help classifier fit before them
+    #     model.freeze()
+    # if epoch == 5:
+    #     model.unfreeze()
     losses = defaultdict(lambda: 0, {})
     model.train()
     for batch_images, classes_real in train_loader:
