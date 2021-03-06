@@ -73,18 +73,13 @@ best_val_loss = math.inf
 log_images = []
 # training
 for epoch in range(1, config.epochs + 1):
-    # if epoch == 1:
-    #     ## freeze encoder and decoder to help classifier fit before them
-    #     model.freeze()
-    # if epoch == 5:
-    #     model.unfreeze()
     losses_train = defaultdict(lambda: 0, {})
     model.train()
     for batch_images, classes_real in train_loader:
         optimizer.zero_grad()
         batch_images, classes_real = batch_images.to(device), classes_real.to(device)
-        reconstructed, mu, logvar, classes_pred = model(batch_images)
-        bce, kld, ce = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
+        reconstructed, mu, logvar = model(batch_images)
+        bce, kld = model.get_loss(reconstructed, batch_images, mu, logvar)
         losses_train["bce"] += bce
         losses_train["kld"] += kld
         # losses_train["ce"] += ce
@@ -104,7 +99,7 @@ for epoch in range(1, config.epochs + 1):
             batch_images, classes_real = batch_images.to(device), classes_real.to(device)
             reconstructed, mu, logvar, classes_pred = model(batch_images)
 
-            bce, kld, ce = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
+            bce, kld = model.get_loss(reconstructed, batch_images, mu, logvar)
             losses_val["bce_val"] += bce
             losses_val["kld_val"] += kld
             # losses_val["ce_val"] += ce
