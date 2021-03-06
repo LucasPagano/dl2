@@ -97,7 +97,7 @@ for epoch in range(1, config.epochs + 1):
         losses_val = defaultdict(lambda: 0, {})
         for batch_images, classes_real in val_loader:
             batch_images, classes_real = batch_images.to(device), classes_real.to(device)
-            reconstructed, mu, logvar, classes_pred = model(batch_images)
+            reconstructed, mu, logvar = model(batch_images)
 
             bce, kld = model.get_loss(reconstructed, batch_images, mu, logvar)
             losses_val["bce_val"] += bce
