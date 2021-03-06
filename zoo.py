@@ -135,7 +135,7 @@ class BVAE(nn.Module):
         # info-vae part
         print(classes_pred.size())
         ce = F.cross_entropy(classes_pred, classes_real)
-        return bce + kld * self.beta + ce
+        return bce,  kld * self.beta, ce
 
 
 class InfoGAN(nn.Module):

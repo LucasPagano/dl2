@@ -1,6 +1,7 @@
 import math
 import os
 import shutil
+from collections import defaultdict
 from pathlib import Path
 
 import numpy as np
@@ -77,45 +78,46 @@ for epoch in range(1, config.epochs + 1):
         model.freeze()
     if epoch == 5:
         model.unfreeze()
-
-    total_train_loss = 0
+    losses = defaultdict(lambda: 0, {})
     model.train()
     for batch_images, classes_real in train_loader:
         optimizer.zero_grad()
         batch_images, classes_real = batch_images.to(device), classes_real.to(device)
         reconstructed, mu, logvar, classes_pred = model(batch_images)
-        train_loss = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
-        total_train_loss += train_loss
+        bce, kld, ce = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
+        losses["bce"] += bce
+        losses["kld"] += kld
+        losses["ce"] += ce
+        train_loss = bce + kld + ce
+        losses["total_train"] += train_loss
         train_loss.backward()
         optimizer.step()
 
     ## WANDB
-    to_log = {"Loss/train": total_train_loss / len(train_loader)}
+    to_log = {"Loss/{}".format(k): v / len(train_loader) for k, v in losses.items()}
 
     # compute validation loss and save model
     with torch.no_grad():
         model.eval()
-        total_val_loss = 0
-        total_val_mse = 0
-        mse = torch.nn.MSELoss()
         for batch_images, classes_real in val_loader:
             batch_images, classes_real = batch_images.to(device), classes_real.to(device)
             reconstructed, mu, logvar, classes_pred = model(batch_images)
 
-            val_loss = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
-            total_val_loss += val_loss
-            total_val_mse += mse(reconstructed.view(-1, 32 * 32), batch_images.view(-1, 32 * 32))
-        if total_val_loss < best_val_loss:
-            best_val_loss = total_val_loss
+            bce, kld, ce = model.get_loss(reconstructed, batch_images, mu, logvar, classes_real, classes_pred)
+            losses["bce_val"] += bce
+            losses["kld_val"] += kld
+            losses["ce_val"] += ce
+            val_loss = bce + kld + ce
+            losses["total_val"] += val_loss
+        if losses["total_val"] < best_val_loss:
+            best_val_loss = losses["total_val"]
             torch.save({
                 "epoch": epoch,
                 "state_dict": model.state_dict(),
             }, os.path.join(model_dir, "model.pt"))
-            to_log["best_val"] = total_val_loss / len(val_loader)
-            to_log["best_mse"] = total_val_mse / len(val_loader)
+            to_log["best_val"] = losses["total_val"] / len(val_loader)
 
-        to_log["Loss/val"] = total_val_loss / len(val_loader)
-        to_log["Mse/val"] = total_val_mse / len(val_loader)
+        to_log = {"Loss/{}".format(k): v / len(train_loader) for k, v in losses.items()}
 
         # plot images
         if epoch % 10 == 0:
