@@ -60,7 +60,8 @@ class BVAE(nn.Module):
             View((-1, 256)),
             nn.Linear(256, 128),
             nn.ReLU(),
-            nn.Linear(128, self.classes_dim)
+            nn.Linear(128, self.classes_dim),
+            nn.LogSoftmax()
         )
 
         self.decoder = nn.Sequential(
@@ -132,7 +133,7 @@ class BVAE(nn.Module):
         # mse = torch.nn.MSELoss()(recon_x.view(x.size()), x)
         kld = -0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp())
         # info-vae part
-        ce = F.cross_entropy(classes_pred, classes_real)
+        ce = F.nll_loss(input=classes_pred, target=classes_real)
         return bce,  kld * self.beta, ce
 
 
