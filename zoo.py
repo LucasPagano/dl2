@@ -124,7 +124,7 @@ class BVAE(nn.Module):
         mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
         classes = self.classifier(x)
         z = self.sampling(mu, log_var)
-        x_recon = self.decode(torch.cat(z, classes))
+        x_recon = self.decode(torch.cat((z, classes)))
         return x_recon, mu, log_var, classes
 
     def get_loss(self, recon_x, x, mu, log_var, classes_real, classes_pred):
