@@ -33,6 +33,7 @@ class BVAE(nn.Module):
         else:
             self.beta = config.beta
         self.z_dim = config.latent_size
+        self.classes_dim = 10
         if "nc" in config.keys():
             nc = config.nc
         else:
@@ -49,9 +50,19 @@ class BVAE(nn.Module):
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
-            nn.Linear(256, self.z_dim * 2)
+            nn.Linear(256, self.z_dim * 2 + self.classes_dim)
         )
-        self.weight_init()
+
+        self.classifier = nn.Sequential(
+            Conv2DReLU(nc, 32, kernel_size=4, stride=2, padding=1),  # (B, nc, 32, 32) -> (B, 32, 16, 16)
+            Conv2DReLU(32, 64, kernel_size=4, stride=2, padding=1),  # (B, 32, 32, 32) -> (B, 64, 8, 8)
+            Conv2DReLU(64, 128, kernel_size=4, stride=2, padding=1),  # (B, 64, 8, 8) -> (B, 128, 4, 4)
+            Conv2DReLU(128, 256, kernel_size=4, stride=1),  # (B, 128, 4, 4) -> (B, 256, 1, 1)
+            nn.Linear(256, 128),
+            nn.ReLU(),
+            nn.Linear(128, 10),
+        )
+
         self.decoder = nn.Sequential(
             nn.Linear(self.z_dim, 256),
             nn.ReLU(),
@@ -69,6 +80,7 @@ class BVAE(nn.Module):
             nn.ConvTranspose2d(32, nc, 4, 2, 1),  # (B, 32, 16, 16) -> (B, nc, 32, 32)
             nn.Sigmoid()
         )
+        self.weight_init()
 
     def weight_init(self):
         for block in self._modules:
@@ -81,6 +93,20 @@ class BVAE(nn.Module):
                     m.weight.data.fill_(1)
                     if m.bias is not None:
                         m.bias.data.fill_(0)
+
+    def freeze(self):
+        # freezes the encoder and decoder
+        for param in self.encoder.parameters():
+            param.requires_grad = False
+        for param in self.decoder.parameters():
+            param.requires_grad = False
+
+    def unfreeze(self):
+        # unfreezes the encoder and decoder
+        for param in self.encoder.parameters():
+            param.requires_grad = False
+        for param in self.decoder.parameters():
+            param.requires_grad = False
 
     def encode(self, x):
         return self.encoder(x)
@@ -96,15 +122,18 @@ class BVAE(nn.Module):
     def forward(self, x):
         encoded = self.encode(x)
         mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
+        classes = self.classifier(x)
         z = self.sampling(mu, log_var)
         x_recon = self.decode(z)
-        return x_recon, mu, log_var
+        return x_recon, mu, log_var, classes
 
-    def get_loss(self, recon_x, x, mu, log_var):
+    def get_loss(self, recon_x, x, mu, log_var, classes_real, classes_pred):
         bce = F.binary_cross_entropy(recon_x.view(-1, 32 * 32), x.view(-1, 32 * 32))
         # mse = torch.nn.MSELoss()(recon_x.view(x.size()), x)
         kld = torch.mean(-0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp(), dim=1), dim=0)
-        return bce + kld * self.beta
+        # info-vae part
+        ce = F.cross_entropy(classes_real, classes_pred)
+        return bce + kld * self.beta + ce
 
 
 class InfoGAN(nn.Module):
