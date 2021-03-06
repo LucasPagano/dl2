@@ -88,7 +88,7 @@ for epoch in range(1, config.epochs + 1):
         losses_train["bce"] += bce
         losses_train["kld"] += kld
         losses_train["ce"] += ce
-        train_loss = bce + kld + ce
+        train_loss = bce + kld
         losses_train["total_train"] += train_loss
         train_loss.backward()
         optimizer.step()
@@ -108,7 +108,7 @@ for epoch in range(1, config.epochs + 1):
             losses_val["bce_val"] += bce
             losses_val["kld_val"] += kld
             losses_val["ce_val"] += ce
-            val_loss = bce + kld + ce
+            val_loss = bce + kld
             losses_val["total_val"] += val_loss
         if losses_val["total_val"] < best_val_loss:
             best_val_loss = losses_val["total_val"]
