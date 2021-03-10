@@ -39,7 +39,7 @@ class BVAE(nn.Module):
         else:
             nc = 1
 
-        self.encoder = nn.Sequential(
+        self.encoder_head = nn.Sequential(
 
             Conv2DReLU(nc, 32, kernel_size=4, stride=2, padding=1),  # (B, nc, 32, 32) -> (B, 32, 16, 16)
             Conv2DReLU(32, 64, kernel_size=4, stride=2, padding=1),  # (B, 32, 32, 32) -> (B, 64, 8, 8)
@@ -50,8 +50,16 @@ class BVAE(nn.Module):
             nn.ReLU(),
             nn.Linear(256, 256),
             nn.ReLU(),
-            nn.Linear(256, self.z_dim * 2)
         )
+
+        self.mu_logvar = nn.Sequential(
+            nn.Linear(256 + self.classes_dim, 128),
+            nn.ReLU(),
+            nn.Linear(256 + self.classes_dim, 128),
+            nn.ReLU(),
+            nn.Linear(128, self.z_dim * 2)
+        )
+
         self.classifier = nn.Sequential(
             Conv2DReLU(nc, 32, kernel_size=4, stride=2, padding=1),  # (B, nc, 32, 32) -> (B, 32, 16, 16)
             Conv2DReLU(32, 64, kernel_size=4, stride=2, padding=1),  # (B, 32, 32, 32) -> (B, 64, 8, 8)
@@ -95,22 +103,8 @@ class BVAE(nn.Module):
                     if m.bias is not None:
                         m.bias.data.fill_(0)
 
-    def freeze(self):
-        # freezes the encoder and decoder
-        for param in self.encoder.parameters():
-            param.requires_grad = False
-        for param in self.decoder.parameters():
-            param.requires_grad = False
-
-    def unfreeze(self):
-        # unfreezes the encoder and decoder
-        for param in self.encoder.parameters():
-            param.requires_grad = True
-        for param in self.decoder.parameters():
-            param.requires_grad = True
-
     def encode(self, x):
-        return self.encoder(x)
+        return self.encoder_head(x)
 
     def sampling(self, mu, log_var):
         std = torch.exp(0.5 * log_var)
@@ -121,9 +115,10 @@ class BVAE(nn.Module):
         return self.decoder(z)
 
     def forward(self, x):
-        encoded = self.encode(x)
-        mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
         classes = self.classifier(x)
+        encoded = self.encode(x)
+        encoded = self.mu_logvar(torch.cat((encoded, classes), dim=1))
+        mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
         z = self.sampling(mu, log_var)
         x_recon = self.decode(torch.cat((z, classes), dim=1))
         return x_recon, mu, log_var, classes
@@ -134,7 +129,7 @@ class BVAE(nn.Module):
         kld = -0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp())
         # info-vae part
         ce = F.nll_loss(input=classes_pred, target=classes_real)
-        return bce,  kld * self.beta, ce
+        return bce, kld * self.beta, ce
 
 
 class InfoGAN(nn.Module):
