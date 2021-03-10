@@ -48,7 +48,7 @@ for batch_images, classes_real in dataloader:
     # classes_pred = classes_pred[0].repeat(10, 1)
     classes_pred = np.zeros(10)
     classes_pred[np.random.randint(0, 10)] = 1
-    classes_pred = torch.Tensor(np.log(np.exp(classes_pred) / sum(np.exp(classes_pred)))).to(device).repeat(10,1)
+    classes_pred = torch.Tensor(classes_pred).to(device).repeat(10,1)
 
     test_latents_c1 = np.zeros(shape=(10, config.latent_size))
     test_latents_c1[:, 0] = np.linspace(-100, 10, 10)
