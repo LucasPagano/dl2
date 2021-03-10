@@ -117,6 +117,7 @@ class BVAE(nn.Module):
     def forward(self, x):
         classes = self.classifier(x)
         encoded = self.encode(x)
+        print(torch.cat((encoded, classes), dim=1).size())
         encoded = self.mu_logvar(torch.cat((encoded, classes), dim=1))
         mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
         z = self.sampling(mu, log_var)
