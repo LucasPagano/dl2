@@ -58,7 +58,7 @@ for batch_images, classes_real in dataloader:
     imgs.append((torchvision.utils.make_grid(x_save1, nrow=10)))
     cpt += 1
     if cpt == nb_examples:
-        wandb.log({"im": wandb.Image(torchvision.utils.make_grid(imgs))})
+        wandb.log({"im": wandb.Image(torchvision.utils.make_grid(imgs, nrow=1))})
         sys.exit(0)
 
 # for batch_images, classes_real in dataloader:
