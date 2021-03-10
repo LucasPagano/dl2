@@ -55,7 +55,7 @@ class BVAE(nn.Module):
         self.mu_logvar = nn.Sequential(
             nn.Linear(256 + self.classes_dim, 128),
             nn.ReLU(),
-            nn.Linear(256 + self.classes_dim, 128),
+            nn.Linear(128, 128),
             nn.ReLU(),
             nn.Linear(128, self.z_dim * 2)
         )
@@ -117,7 +117,6 @@ class BVAE(nn.Module):
     def forward(self, x):
         classes = self.classifier(x)
         encoded = torch.cat((self.encode(x), classes), dim=1)
-        print(encoded.size())
         encoded = self.mu_logvar(encoded)
         mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
         z = self.sampling(mu, log_var)
