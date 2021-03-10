@@ -43,8 +43,15 @@ dataloader = torch.utils.data.DataLoader(
 for batch_images, classes_real in dataloader:
     batch_images, classes_real = batch_images.to(device), classes_real.to(device)
     classes_pred = model.classifier(batch_images)
+    classes_pred = classes_pred[0]
     print(classes_pred)
     print(classes_pred.exp())
     print(classes_pred.exp().sum())
+    test_latents_c1 = np.zeros(shape=(10, config.latent_size))
+    test_latents_c1[:, 0] = np.linspace(-1, 1, 10)
+    test_latents_c1 = np.hstack((test_latents_c1, classes_pred))
+    test_latents_c1 = torch.FloatTensor(test_latents_c1).to(device)
+    x_save1 = model.decode(test_latents_c1)
+    wandb.log({"im":wandb.Image(x_save1)})
     sys.exit(0)
 
