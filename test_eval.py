@@ -10,7 +10,7 @@ from zoo import BVAE
 import numpy as np
 import copy
 
-run_id = "2pjycujg"
+run_id = "3mcqd5pj"
 nb_examples = 5
 
 wandb.init(project="eval-vae", entity="lucas_p")
