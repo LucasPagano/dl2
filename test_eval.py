@@ -44,5 +44,7 @@ for batch_images, classes_real in dataloader:
     batch_images, classes_real = batch_images.to(device), classes_real.to(device)
     classes_pred = model.classifier(batch_images)
     print(classes_pred)
+    print(classes_pred.exp())
+    print(classes_pred.exp().sum())
     sys.exit(0)
 
