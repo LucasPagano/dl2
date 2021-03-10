@@ -28,7 +28,6 @@ print("Best epoch : {}".format(state["epoch"]))
 model = BVAE(config).to(device).eval()
 model.load_state_dict(state["state_dict"])
 
-
 transform = torchvision.transforms.Compose([
     torchvision.transforms.Resize((32, 32)),
     torchvision.transforms.ToTensor()])
@@ -49,9 +48,8 @@ for batch_images, classes_real in dataloader:
     print(classes_pred.exp().sum())
     test_latents_c1 = np.zeros(shape=(10, config.latent_size))
     test_latents_c1[:, 0] = np.linspace(-1, 1, 10)
-    test_latents_c1 = np.hstack((test_latents_c1, classes_pred))
     test_latents_c1 = torch.FloatTensor(test_latents_c1).to(device)
+    test_latents_c1 = torch.hstack((test_latents_c1, classes_pred))
     x_save1 = model.decode(test_latents_c1)
-    wandb.log({"im":wandb.Image(x_save1)})
+    wandb.log({"im": wandb.Image(x_save1)})
     sys.exit(0)
-
