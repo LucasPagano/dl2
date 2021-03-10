@@ -44,15 +44,21 @@ cpt = 0
 imgs = []
 for batch_images, classes_real in dataloader:
     batch_images, classes_real = batch_images.to(device), classes_real.to(device)
-    classes_pred = model.classifier(batch_images)
-    classes_pred = classes_pred[0].repeat(10, 1)
+    # classes_pred = model.classifier(batch_images)
+    # classes_pred = classes_pred[0].repeat(10, 1)
+    classes_pred = np.zeros(10)
+    classes_pred[np.random.randint(0, 10)] = 1
+    classes_pred = torch.Tensor(np.log(np.exp(classes_pred) / sum(np.exp(classes_pred)))).to(device).repeat(10,1)
+
     test_latents_c1 = np.zeros(shape=(10, config.latent_size))
-    test_latents_c1[:, 0] = np.linspace(-10, 10, 10)
+    test_latents_c1[:, 0] = np.linspace(-100, 10, 10)
     test_latents_c1 = torch.FloatTensor(test_latents_c1).to(device)
     test_latents_c1 = torch.hstack((test_latents_c1, classes_pred))
     x_save1 = model.decode(test_latents_c1)
     imgs.append((torchvision.utils.make_grid(x_save1, nrow=10)))
     cpt += 1
     if cpt == nb_examples:
-        wandb.log({"im":wandb.Image(torchvision.utils.make_grid(imgs))})
+        wandb.log({"im": wandb.Image(torchvision.utils.make_grid(imgs))})
         sys.exit(0)
+
+# for batch_images, classes_real in dataloader:
