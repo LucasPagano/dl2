@@ -115,21 +115,19 @@ class BVAE(nn.Module):
         return self.decoder(z)
 
     def forward(self, x):
-        classes = self.classifier(x)
-        encoded = torch.cat((self.encode(x), classes), dim=1)
-        encoded = self.mu_logvar(encoded)
+        encoded = self.encoder(x)
         mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
         z = self.sampling(mu, log_var)
-        x_recon = self.decode(torch.cat((z, classes), dim=1))
-        return x_recon, mu, log_var, classes
+        x_recon = self.decode(z)
+        return x_recon, mu, log_var
 
-    def get_loss(self, recon_x, x, mu, log_var, classes_real, classes_pred):
+    def get_loss(self, recon_x, x, mu, log_var):
         bce = F.binary_cross_entropy(recon_x.view(-1, 32 * 32), x.view(-1, 32 * 32), reduction="sum")
         # mse = torch.nn.MSELoss()(recon_x.view(x.size()), x)
         kld = -0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp())
         # info-vae part
-        ce = F.nll_loss(input=classes_pred, target=classes_real)
-        return bce, kld * self.beta, ce
+        # ce = F.nll_loss(input=classes_pred, target=classes_real)
+        return bce, kld * self.beta
 
 
 class InfoGAN(nn.Module):
