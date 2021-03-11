@@ -83,7 +83,7 @@ def plot_mus():
     mus = mus.astype({"class": "category"})
     fig, axes = plt.subplots()
     sns.scatterplot(ax=axes, data=mus, x="mu1", y="mu2", hue="class")
-    wandb.log({"mu1 vs mu2": plt})
+    wandb.log({"mu1 vs mu2": wandb.Image(plt)})
 
 
 plot_mus()
