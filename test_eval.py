@@ -1,6 +1,8 @@
 import sys
 
 import torch
+import seaborn as sns
+import pandas as pd
 import torchvision
 import matplotlib.pyplot as plt
 import wandb
@@ -40,26 +42,41 @@ dataloader = torch.utils.data.DataLoader(
     dataset, batch_size=config.batch_size, shuffle=True
 )
 
-cpt = 0
-imgs = []
-for batch_images, classes_real in dataloader:
-    batch_images, classes_real = batch_images.to(device), classes_real.to(device)
-    classes_pred = model.classifier(batch_images)
-    classes_pred = classes_pred[0].exp().repeat(10, 1)
-    print(classes_pred)
-    classes_pred = np.zeros(10)
-    classes_pred[np.random.randint(0, 10)] = 1
-    classes_pred = torch.Tensor(classes_pred).to(device).repeat(10, 1)
 
-    test_latents_c1 = np.zeros(shape=(10, config.latent_size))
-    test_latents_c1[:, 0] = np.linspace(-100, 10, 10)
-    test_latents_c1 = torch.FloatTensor(test_latents_c1).to(device)
-    test_latents_c1 = torch.hstack((test_latents_c1, classes_pred))
-    x_save1 = model.decode(test_latents_c1)
-    imgs.append((torchvision.utils.make_grid(x_save1, nrow=10)))
-    cpt += 1
-    if cpt == nb_examples:
-        wandb.log({"im": wandb.Image(torchvision.utils.make_grid(imgs, nrow=1))})
-        sys.exit(0)
+def plot_test_set():
+    cpt = 0
+    imgs = []
+    for batch_images, classes_real in dataloader:
+        batch_images, classes_real = batch_images.to(device), classes_real.to(device)
+        classes_pred = model.classifier(batch_images)
+        classes_pred = classes_pred[0].exp().repeat(10, 1)
+        print(classes_pred)
+        classes_pred = np.zeros(10)
+        classes_pred[np.random.randint(0, 10)] = 1
+        classes_pred = torch.Tensor(classes_pred).to(device).repeat(10, 1)
 
-# for batch_images, classes_real in dataloader:
+        test_latents_c1 = np.zeros(shape=(10, config.latent_size))
+        test_latents_c1[:, 0] = np.linspace(-100, 10, 10)
+        test_latents_c1 = torch.FloatTensor(test_latents_c1).to(device)
+        test_latents_c1 = torch.hstack((test_latents_c1, classes_pred))
+        x_save1 = model.decode(test_latents_c1)
+        imgs.append((torchvision.utils.make_grid(x_save1, nrow=10)))
+        cpt += 1
+        if cpt == nb_examples:
+            wandb.log({"im": wandb.Image(torchvision.utils.make_grid(imgs, nrow=1))})
+            sys.exit(0)
+
+
+def plot_mus():
+    mus = pd.DataFrame(columns=['mu1', 'mu2', 'class'])
+    for batch_images, classes_real in dataloader:
+        batch_images, classes_real = batch_images.to(device), classes_real.to(device)
+        classes = model.classifier(batch_images)
+        encoded = torch.cat((model.encode(batch_images), classes), dim=1)
+        encoded = model.mu_logvar(encoded)
+        mu = encoded[:, :model.z_dim]
+        to_add = torch.cat((mu, classes_real), dim=0)
+        mus.append(to_add.cpu().numpy())
+
+
+plot_mus()
