@@ -85,4 +85,4 @@ def plot_mus():
         sns.scatterplot(ax=axes, data=mus, x="mu1", y="mu2", hue="class")
         wandb.log({"mu1 vs mu2": plt})
 
-        plot_mus()
+plot_mus()
