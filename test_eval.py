@@ -69,7 +69,8 @@ def plot_test_set():
 
 def plot_mus():
     print("starting to plot mus")
-    mus = pd.DataFrame(columns=['mu1', 'mu2', 'class'])
+    columns = ['mu1', 'mu2', 'class']
+    mus = pd.DataFrame(columns=columns)
     for batch_images, classes_real in dataloader:
         batch_images, classes_real = batch_images.to(device), classes_real.to(device)
         classes = model.classifier(batch_images)
@@ -77,9 +78,10 @@ def plot_mus():
         encoded = model.mu_logvar(encoded)
         mu = encoded[:, :model.z_dim]
         to_add = torch.hstack((mu, classes_real.unsqueeze(-1)))
-        mus.append(to_add.detach().cpu().numpy())
+        mus.append(pd.DataFrame(to_add.detach().cpu().numpy(), columns=columns))
     axes = sns.scatterplot(data=mus, x="mu1", y="mu2", hue="class")
     plt.plot(axes)
-    wandb.log({"mu1 vs mu2":plt})
+    wandb.log({"mu1 vs mu2": plt})
+
 
 plot_mus()
