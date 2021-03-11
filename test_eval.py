@@ -15,7 +15,7 @@ import copy
 run_id = "3mcqd5pj"
 nb_examples = 5
 
-wandb.init(project="eval-vae", entity="lucas_p")
+wandb.init(project="eval-vae")
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
@@ -76,7 +76,7 @@ def plot_mus():
         encoded = torch.cat((model.encode(batch_images), classes), dim=1)
         encoded = model.mu_logvar(encoded)
         mu = encoded[:, :model.z_dim]
-        to_add = torch.cat((mu, classes_real), dim=0)
+        to_add = torch.hstack((mu, classes_real.unsqueeze(-1)))
         mus.append(to_add.cpu().numpy())
     axes = sns.scatterplot(data=mus, x="mu1", y="mu2", hue="class")
     plt.plot(axes)
