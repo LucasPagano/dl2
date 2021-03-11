@@ -78,11 +78,12 @@ def plot_mus():
         encoded = model.mu_logvar(encoded)
         mu = encoded[:, :model.z_dim]
         to_add = torch.hstack((mu, classes_real.unsqueeze(-1)))
-        print(to_add)
-        mus.append(pd.DataFrame(to_add.detach().cpu().numpy(), columns=columns))
-        print(mus.head())
-        fig, axes = plt.subplots()
-        sns.scatterplot(ax=axes, data=mus, x="mu1", y="mu2", hue="class")
-        wandb.log({"mu1 vs mu2": plt})
+        mus = mus.append(pd.DataFrame(to_add.detach().cpu().numpy(), columns=columns))
+
+    print(mus.head())
+    fig, axes = plt.subplots()
+    sns.scatterplot(ax=axes, data=mus, x="mu1", y="mu2", hue="class")
+    wandb.log({"mu1 vs mu2": plt})
+
 
 plot_mus()
