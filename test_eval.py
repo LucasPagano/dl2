@@ -3,8 +3,8 @@ import sys
 import torch
 import seaborn as sns
 import pandas as pd
-import torchvision
 import matplotlib.pyplot as plt
+import torchvision
 import wandb
 from utils import Dotdict
 
@@ -77,6 +77,8 @@ def plot_mus():
         mu = encoded[:, :model.z_dim]
         to_add = torch.cat((mu, classes_real), dim=0)
         mus.append(to_add.cpu().numpy())
-
+    axes = sns.scatterplot(data=mus, x="mu1", y="mu2", hue="class")
+    plt.plot(axes)
+    wandb.log("mu1 vs mu2")
 
 plot_mus()
