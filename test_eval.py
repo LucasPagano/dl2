@@ -77,7 +77,7 @@ def plot_mus():
         encoded = model.mu_logvar(encoded)
         mu = encoded[:, :model.z_dim]
         to_add = torch.hstack((mu, classes_real.unsqueeze(-1)))
-        mus.append(to_add.cpu().numpy())
+        mus.append(to_add.detach().cpu().numpy())
     axes = sns.scatterplot(data=mus, x="mu1", y="mu2", hue="class")
     plt.plot(axes)
     wandb.log({"mu1 vs mu2":plt})
