@@ -68,6 +68,7 @@ def plot_test_set():
 
 
 def plot_mus():
+    print("starting to plot mus")
     mus = pd.DataFrame(columns=['mu1', 'mu2', 'class'])
     for batch_images, classes_real in dataloader:
         batch_images, classes_real = batch_images.to(device), classes_real.to(device)
@@ -79,6 +80,6 @@ def plot_mus():
         mus.append(to_add.cpu().numpy())
     axes = sns.scatterplot(data=mus, x="mu1", y="mu2", hue="class")
     plt.plot(axes)
-    wandb.log("mu1 vs mu2")
+    wandb.log({"mu1 vs mu2":plt})
 
 plot_mus()
