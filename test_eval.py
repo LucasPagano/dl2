@@ -80,7 +80,7 @@ def plot_mus():
         to_add = torch.hstack((mu, classes_real.unsqueeze(-1)))
         mus.append(pd.DataFrame(to_add.detach().cpu().numpy(), columns=columns))
 
-    fig, axes = plt.subplot()
+    axes = plt.gca()
     sns.scatterplot(ax=axes[0], data=mus, x="mu1", y="mu2", hue="class")
 
     plt.plot(axes.fig)
