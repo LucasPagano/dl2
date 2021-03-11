@@ -80,7 +80,7 @@ def plot_mus():
         to_add = torch.hstack((mu, classes_real.unsqueeze(-1)))
         mus.append(pd.DataFrame(to_add.detach().cpu().numpy(), columns=columns))
     axes = sns.scatterplot(data=mus, x="mu1", y="mu2", hue="class")
-    plt.plot(axes)
+    plt.plot(axes.fig   )
     wandb.log({"mu1 vs mu2": plt})
 
 
