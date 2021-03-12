@@ -63,7 +63,7 @@ class BVAE(nn.Module):
         # build decoder
         modules = []
 
-        self.decoder_input = nn.Linear(self.z_dimœ, self.hidden_dims[-1] * 4)
+        self.decoder_input = nn.Linear(self.z_dim, self.hidden_dims[-1] * 4)
 
         self.hidden_dims.reverse()
 
