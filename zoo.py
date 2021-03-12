@@ -136,6 +136,7 @@ class BVAE(nn.Module):
         return x_recon, mu, log_var
 
     def get_loss(self, recon_x, x, mu, log_var):
+        print(recon_x.size(), x.size())
         bce = F.binary_cross_entropy(recon_x.view(-1, 32 * 32), x.view(-1, 32 * 32), reduction="sum")
         # mse = torch.nn.MSELoss()(recon_x.view(x.size()), x)
         kld = -0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp())
