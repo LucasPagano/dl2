@@ -57,8 +57,8 @@ class BVAE(nn.Module):
             in_channels = h_dim
 
         self.encoder = nn.Sequential(*modules)
-        self.fc_mu = nn.Linear(self.hidden_dims[-1] * 4, self.z_dim)
-        self.fc_var = nn.Linear(self.hidden_dims[-1] * 4, self.z_dim)
+        self.fc_mu = nn.Linear(self.hidden_dims[-1], self.z_dim)
+        self.fc_var = nn.Linear(self.hidden_dims[-1], self.z_dim)
 
         # build decoder
         modules = []
