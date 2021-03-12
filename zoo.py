@@ -112,6 +112,7 @@ class BVAE(nn.Module):
     def encode(self, x):
         encoded = self.encoder(x)
         encoded = torch.flatten(encoded, start_dim=1)
+        print(encoded.size())
         mu = self.fc_mu(encoded)
         log_var = self.fc_var(encoded)
         return mu, log_var
