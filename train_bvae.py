@@ -1,6 +1,7 @@
 import math
 import os
 import shutil
+import time
 from collections import defaultdict
 from pathlib import Path
 
@@ -27,7 +28,14 @@ HPP_DEFAULT = dict(
 
 ### WANDB
 # init run and get config for sweep initialized runs
-run = wandb.init(project="wandb-demo", config=HPP_DEFAULT)
+while True:
+    try:
+        run = wandb.init(project="wandb-demo", config=HPP_DEFAULT)
+        break
+    except:
+        print("Retrying")
+        time.sleep(10)
+        
 config = wandb.config
 print(config)
 torch.manual_seed(config.seed)
@@ -114,7 +122,8 @@ for epoch in range(1, config.epochs + 1):
             to_log["best_val"] = losses_val["total_val"] / len(val_loader)
 
         ## merge 2 dicts
-        to_log = {**to_log, **{"Loss/{}".format(k): v / (len(val_loader) * config.batch_size) for k, v in losses_val.items()}}
+        to_log = {**to_log,
+                  **{"Loss/{}".format(k): v / (len(val_loader) * config.batch_size) for k, v in losses_val.items()}}
 
         # plot images
         if epoch % 10 == 0:
