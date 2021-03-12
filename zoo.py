@@ -35,60 +35,66 @@ class BVAE(nn.Module):
         self.z_dim = config.latent_size
         self.classes_dim = 10
         if "nc" in config.keys():
-            nc = config.nc
+            in_channels = config.nc
         else:
-            nc = 1
+            self.in_channels = 1
+        if "hidden_dims" in config.keys():
+            self.hidden_dims = config.hidden_dims
+        else:
+            self.hidden_dims = [32, 64, 128, 256, 512]
 
-        self.encoder_head = nn.Sequential(
+        # build encoder
+        modules = []
+        in_channels = self.in_channels
+        for h_dim in self.hidden_dims:
+            modules.append(
+                nn.Sequential(
+                    nn.Conv2d(in_channels, out_channels=h_dim,
+                              kernel_size=3, stride=2, padding=1),
+                    nn.BatchNorm2d(h_dim),
+                    nn.LeakyReLU())
+            )
+            in_channels = h_dim
 
-            Conv2DReLU(nc, 32, kernel_size=4, stride=2, padding=1),  # (B, nc, 32, 32) -> (B, 32, 16, 16)
-            Conv2DReLU(32, 64, kernel_size=4, stride=2, padding=1),  # (B, 32, 32, 32) -> (B, 64, 8, 8)
-            Conv2DReLU(64, 128, kernel_size=4, stride=2, padding=1),  # (B, 64, 8, 8) -> (B, 128, 4, 4)
-            Conv2DReLU(128, 256, kernel_size=4, stride=1),  # (B, 128, 4, 4) -> (B, 256, 1, 1)
-            View((-1, 256)),
-            nn.Linear(256, 256),
-            nn.ReLU(),
-            nn.Linear(256, 256),
-            nn.ReLU(),
-        )
+        self.encoder = nn.Sequential(*modules)
+        self.fc_mu = nn.Linear(self.hidden_dims[-1] * 4, self.z_dim)
+        self.fc_var = nn.Linear(self.hidden_dims[-1] * 4, self.z_dim)
 
-        self.mu_logvar = nn.Sequential(
-            nn.Linear(256 + self.classes_dim, 128),
-            nn.ReLU(),
-            nn.Linear(128, 128),
-            nn.ReLU(),
-            nn.Linear(128, self.z_dim * 2)
-        )
+        # build decoder
+        modules = []
 
-        self.classifier = nn.Sequential(
-            Conv2DReLU(nc, 32, kernel_size=4, stride=2, padding=1),  # (B, nc, 32, 32) -> (B, 32, 16, 16)
-            Conv2DReLU(32, 64, kernel_size=4, stride=2, padding=1),  # (B, 32, 32, 32) -> (B, 64, 8, 8)
-            Conv2DReLU(64, 128, kernel_size=4, stride=2, padding=1),  # (B, 64, 8, 8) -> (B, 128, 4, 4)
-            Conv2DReLU(128, 256, kernel_size=4, stride=1),  # (B, 128, 4, 4) -> (B, 256, 1, 1)
-            View((-1, 256)),
-            nn.Linear(256, 128),
-            nn.ReLU(),
-            nn.Linear(128, self.classes_dim),
-            nn.LogSoftmax(dim=1)
-        )
+        self.decoder_input = nn.Linear(self.z_dim + self.classes_dim, self.hidden_dims[-1] * 4)
 
-        self.decoder = nn.Sequential(
-            nn.Linear(self.z_dim + self.classes_dim, 256),
-            nn.ReLU(),
-            nn.Linear(256, 256),
-            nn.ReLU(),
-            nn.Linear(256, 256),
-            nn.ReLU(),
-            View((-1, 256, 1, 1)),
-            nn.ConvTranspose2d(256, 64, 4),  # (B, 256, 1, 1) -> (B, 64, 4, 4)
-            nn.ReLU(),
-            nn.ConvTranspose2d(64, 64, 4, 2, 1),  # (B, 64, 4, 4) -> (B, 64, 8, 8)
-            nn.ReLU(),
-            nn.ConvTranspose2d(64, 32, 4, 2, 1),  # (B, 64, 8, 8) -> (B, 32, 16, 16)
-            nn.ReLU(),
-            nn.ConvTranspose2d(32, nc, 4, 2, 1),  # (B, 32, 16, 16) -> (B, nc, 32, 32)
-            nn.Sigmoid()
-        )
+        self.hidden_dims.reverse()
+
+        for i in range(len(self.hidden_dims) - 1):
+            modules.append(
+                nn.Sequential(
+                    nn.ConvTranspose2d(self.hidden_dims[i],
+                                       self.hidden_dims[i + 1],
+                                       kernel_size=3,
+                                       stride=2,
+                                       padding=1,
+                                       output_padding=1),
+                    nn.BatchNorm2d(self.hidden_dims[i + 1]),
+                    nn.LeakyReLU())
+            )
+        self.decoder = nn.Sequential(*modules)
+
+        self.final_layer = nn.Sequential(
+            nn.ConvTranspose2d(self.hidden_dims[-1],
+                               self.hidden_dims[-1],
+                               kernel_size=3,
+                               stride=2,
+                               padding=1,
+                               output_padding=1),
+            nn.BatchNorm2d(self.hidden_dims[-1]),
+            nn.LeakyReLU(),
+            nn.Conv2d(self.hidden_dims[-1], out_channels=self.in_channels,
+                      kernel_size=3, padding=1),
+            nn.Sigmoid())
+
+        # init weights
         self.weight_init()
 
     def weight_init(self):
@@ -104,20 +110,27 @@ class BVAE(nn.Module):
                         m.bias.data.fill_(0)
 
     def encode(self, x):
-        return self.encoder_head(x)
+        encoded = self.encoder(x)
+        encoded = torch.flatten(encoded, start_dim=1)
+        mu = self.fc_mu(encoded)
+        log_var = self.fc_var(encoded)
+        return mu, log_var
 
-    def sampling(self, mu, log_var):
+    def reparameterize(self, mu, log_var):
         std = torch.exp(0.5 * log_var)
         eps = torch.randn_like(std)
         return eps.mul(std).add_(mu)  # return z sample
 
     def decode(self, z):
-        return self.decoder(z)
+        result = self.decoder_input(z)
+        result = result.view(-1, 512, 2, 2)
+        result = self.decoder(result)
+        result = self.final_layer(result)
+        return result
 
     def forward(self, x):
-        encoded = self.encoder(x)
-        mu, log_var = encoded[:, :self.z_dim], encoded[:, self.z_dim:]
-        z = self.sampling(mu, log_var)
+        mu, log_var = self.encode(x)
+        z = self.reparameterize(mu, log_var)
         x_recon = self.decode(z)
         return x_recon, mu, log_var
 
