@@ -63,7 +63,7 @@ class BVAE(nn.Module):
         # build decoder
         modules = []
 
-        self.decoder_input = nn.Linear(self.z_dim, self.hidden_dims[-1] * 4)
+        self.decoder_input = nn.Linear(self.z_dim, self.hidden_dims[-1])
 
         self.hidden_dims.reverse()
 
@@ -137,7 +137,7 @@ class BVAE(nn.Module):
 
     def get_loss(self, recon_x, x, mu, log_var):
         print(recon_x.size(), x.size())
-        bce = F.binary_cross_entropy(recon_x.view(-1, 32 * 32), x.view(-1, 32 * 32), reduction="sum")
+        bce = F.binary_cross_entropy(recon_x.view(-1, 32, 32), x.view(-1, 32, 32), reduction="sum")
         # mse = torch.nn.MSELoss()(recon_x.view(x.size()), x)
         kld = -0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp())
         # info-vae part
