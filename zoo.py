@@ -112,7 +112,6 @@ class BVAE(nn.Module):
     def encode(self, x):
         encoded = self.encoder(x)
         encoded = torch.flatten(encoded, start_dim=1)
-        print(encoded.size())
         mu = self.fc_mu(encoded)
         log_var = self.fc_var(encoded)
         return mu, log_var
@@ -124,7 +123,7 @@ class BVAE(nn.Module):
 
     def decode(self, z):
         result = self.decoder_input(z)
-        result = result.view(-1, 512, 2, 2)
+        result = result.view(-1, 512, 1, 1)
         result = self.decoder(result)
         result = self.final_layer(result)
         return result
@@ -136,7 +135,6 @@ class BVAE(nn.Module):
         return x_recon, mu, log_var
 
     def get_loss(self, recon_x, x, mu, log_var):
-        print(recon_x.size(), x.size())
         bce = F.binary_cross_entropy(recon_x.view(-1, 32, 32), x.view(-1, 32, 32), reduction="sum")
         # mse = torch.nn.MSELoss()(recon_x.view(x.size()), x)
         kld = -0.5 * torch.sum(1 + log_var - mu ** 2 - log_var.exp())
