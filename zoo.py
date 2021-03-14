@@ -41,9 +41,9 @@ class BVAE(nn.Module):
         in_channels = self.in_channels
 
         if self.conditional:
-            in_channels += 1
             self.embed_class = nn.Linear(self.classes_dim, self.image_size * self.image_size)
             self.embed_data = nn.Conv2d(in_channels, in_channels, kernel_size=1)
+            in_channels += 1
 
         for h_dim in self.hidden_dims:
             modules.append(
@@ -135,6 +135,7 @@ class BVAE(nn.Module):
             one_hot = torch.zeros(classes_real.size(0), self.classes_dim).to(classes_real.device)
             one_hot[torch.arange(classes_real.size(0)), classes_real] = 1
             embedded_class = self.embed_class(one_hot).view(-1, self.image_size, self.image_size)
+            print(x.size())
             embedded_input = self.embed_data(x)
             x = torch.cat((embedded_input, embedded_class), dim=1)
         mu, log_var = self.encode(x)
