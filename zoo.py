@@ -41,7 +41,7 @@ class BVAE(nn.Module):
         in_channels = self.in_channels
 
         if self.conditional:
-            self.embed_class = nn.Linear(self.classes_dim, self.image_size * self.image_size)
+            self.embed_class = nn.Linear(self.classes_dim, self.image_size * self.image_size).unsqueeze(1)
             self.embed_data = nn.Conv2d(in_channels, in_channels, kernel_size=1)
             in_channels += 1
 
