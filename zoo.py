@@ -28,24 +28,23 @@ class BVAE(nn.Module):
     def __init__(self, config):
         super(BVAE, self).__init__()
         self.name = "BVAE"
-        if config.beta is None:
-            self.beta = 1
-        else:
-            self.beta = config.beta
+        self.image_size = config.image_size if "image_size" in config.keys() else 32
+        self.conditional = config.conditional if "conditional" in config.keys() else False
+        self.beta = config.beta if "beta" in config.keys() else 1
+        self.in_channels = config.nc if "nc" in config.keys() else 1
+        self.hidden_dims = config.hidden_dims if "hidden_dims" in config.keys() else [32, 64, 128, 256, 512]
         self.z_dim = config.latent_size
         self.classes_dim = 10
-        if "nc" in config.keys():
-            in_channels = config.nc
-        else:
-            self.in_channels = 1
-        if "hidden_dims" in config.keys():
-            self.hidden_dims = config.hidden_dims
-        else:
-            self.hidden_dims = [32, 64, 128, 256, 512]
 
         # build encoder
         modules = []
         in_channels = self.in_channels
+
+        if self.conditional:
+            in_channels += 1
+            self.embed_class = nn.Linear(self.classes_dim, self.image_size * self.image_size)
+            self.embed_data = nn.Conv2d(in_channels, in_channels, kernel_size=1)
+
         for h_dim in self.hidden_dims:
             modules.append(
                 nn.Sequential(
@@ -62,8 +61,10 @@ class BVAE(nn.Module):
 
         # build decoder
         modules = []
-
-        self.decoder_input = nn.Linear(self.z_dim, self.hidden_dims[-1])
+        if self.conditional:
+            self.decoder_input = nn.Linear(self.z_dim + self.classes_dim, self.hidden_dims[-1])
+        else:
+            self.decoder_input = nn.Linear(self.z_dim, self.hidden_dims[-1])
 
         self.hidden_dims.reverse()
 
@@ -128,7 +129,11 @@ class BVAE(nn.Module):
         result = self.final_layer(result)
         return result
 
-    def forward(self, x):
+    def forward(self, x, classes_real):
+        if self.conditional:
+            embedded_class = self.embed_class(classes_real).view(-1, self.image_size, self.image_size)
+            embedded_input = self.embed_data(x)
+            x = torch.cat((embedded_input, embedded_class), dim=1)
         mu, log_var = self.encode(x)
         z = self.reparameterize(mu, log_var)
         x_recon = self.decode(z)

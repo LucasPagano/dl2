@@ -23,7 +23,9 @@ HPP_DEFAULT = dict(
     seed=42,
     beta=2,
     latent_size=4,
-    optimizer="Adam"
+    optimizer="Adam",
+    hidden_dims=[32, 64, 128, 256, 512],
+    conditional=True
 )
 
 ### WANDB
@@ -35,7 +37,7 @@ while True:
     except:
         print("Retrying")
         time.sleep(10)
-        
+
 config = wandb.config
 print(config)
 torch.manual_seed(config.seed)
@@ -86,7 +88,7 @@ for epoch in range(1, config.epochs + 1):
     for batch_images, classes_real in train_loader:
         optimizer.zero_grad()
         batch_images, classes_real = batch_images.to(device), classes_real.to(device)
-        reconstructed, mu, logvar = model(batch_images)
+        reconstructed, mu, logvar = model(batch_images, classes_real)
         bce, kld = model.get_loss(reconstructed, batch_images, mu, logvar)
         train_loss = bce + kld
         train_loss.backward()
@@ -106,7 +108,7 @@ for epoch in range(1, config.epochs + 1):
         losses_val = defaultdict(lambda: 0, {})
         for batch_images, classes_real in val_loader:
             batch_images, classes_real = batch_images.to(device), classes_real.to(device)
-            reconstructed, mu, logvar = model(batch_images)
+            reconstructed, mu, logvar = model(batch_images, classes_real)
 
             bce, kld = model.get_loss(reconstructed, batch_images, mu, logvar)
             losses_val["bce_val"] += bce
