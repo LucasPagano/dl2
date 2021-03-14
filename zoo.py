@@ -131,6 +131,7 @@ class BVAE(nn.Module):
 
     def forward(self, x, classes_real):
         if self.conditional:
+            print(classes_real.size())
             embedded_class = self.embed_class(classes_real).view(-1, self.image_size, self.image_size)
             embedded_input = self.embed_data(x)
             x = torch.cat((embedded_input, embedded_class), dim=1)
