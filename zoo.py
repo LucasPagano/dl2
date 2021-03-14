@@ -133,7 +133,7 @@ class BVAE(nn.Module):
         if self.conditional:
             # make one hot from labels
             one_hot = torch.zeros(classes_real.size(0), self.classes_dim).to(classes_real.device)
-            one_hot[torch.arange(classes_real.size(0), classes_real)] = 1
+            one_hot[torch.arange(classes_real.size(0)), classes_real] = 1
             embedded_class = self.embed_class(one_hot).view(-1, self.image_size, self.image_size)
             embedded_input = self.embed_data(x)
             x = torch.cat((embedded_input, embedded_class), dim=1)
