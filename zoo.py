@@ -141,7 +141,7 @@ class BVAE(nn.Module):
         mu, log_var = self.encode(x)
         z = self.reparameterize(mu, log_var)
         if self.conditional:
-            z = torch.cat((z, classes_real), dim=1)
+            z = torch.cat((z, one_hot), dim=1)
         x_recon = self.decode(z)
         return x_recon, mu, log_var
 
