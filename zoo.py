@@ -131,8 +131,10 @@ class BVAE(nn.Module):
 
     def forward(self, x, classes_real):
         if self.conditional:
-            print(classes_real.size())
-            embedded_class = self.embed_class(classes_real).view(-1, self.image_size, self.image_size)
+            # make one hot from labels
+            one_hot = torch.zeros(classes_real.size(0), self.classes_dim).to(classes_real.device)
+            one_hot[torch.arange(classes_real.size(0), classes_real)] = 1
+            embedded_class = self.embed_class(one_hot).view(-1, self.image_size, self.image_size)
             embedded_input = self.embed_data(x)
             x = torch.cat((embedded_input, embedded_class), dim=1)
         mu, log_var = self.encode(x)
