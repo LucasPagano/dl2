@@ -69,7 +69,7 @@ transform = torchvision.transforms.Compose([
     torchvision.transforms.ToTensor()])
 
 dataset = torchvision.datasets.MNIST(
-    root="./datasets/", train=True, one_hot=True, transform=transform, download=True
+    root="./datasets/", train=True, transform=transform, download=True
 )
 train_set, val_set = torch.utils.data.random_split(dataset, [50000, 10000])
 train_loader = torch.utils.data.DataLoader(
