@@ -77,7 +77,7 @@ class BVAE(nn.Module):
                                        stride=2,
                                        padding=1,
                                        output_padding=1),
-                    nn.BatchNorm2d(self.hidden_dims[i + 1]),
+                    # nn.BatchNorm2d(self.hidden_dims[i + 1]),
                     nn.LeakyReLU())
             )
         self.decoder = nn.Sequential(*modules)
