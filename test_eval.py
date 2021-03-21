@@ -87,9 +87,10 @@ def plot_test_set():
 
 
 def generate(n=1000):
-    cpt = 0
+    print("Starting generation")
+    all_images = []
     batch_size = config.batch_size
-    while cpt < n:
+    while len(all_images) < n:
         # generate batch size examples
         # pick from random distribution
         z = torch.randn(batch_size, config.latent_size).to(device)
@@ -100,6 +101,8 @@ def generate(n=1000):
         z = torch.cat((z, one_hot), dim=1)
         # generate images
         gen = model.decode(z)
-
+        gen = gen.detach().cpu()
+        all_images.extend([gen[x].numpy() for x in range(gen.size(0))])
+    print("Generation done")
 
 generate()

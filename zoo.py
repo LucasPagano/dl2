@@ -143,7 +143,7 @@ class BVAE(nn.Module):
             z = torch.cat((z, one_hot), dim=1)
         x_recon = self.decode(z)
         return x_recon, mu, log_var
-            
+
 
     def get_loss(self, recon_x, x, mu, log_var):
         bce = F.binary_cross_entropy(recon_x.view(-1, 32, 32), x.view(-1, 32, 32), reduction="sum")
