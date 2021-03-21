@@ -1,5 +1,8 @@
+import os
+import shutil
 import sys
-
+from pathlib import Path
+from torchvision.utils import save_image
 import torch
 import seaborn as sns
 import pandas as pd
@@ -87,6 +90,9 @@ def plot_test_set():
 
 
 def generate(n=1000):
+    out_folder = "out/" + str(run_id)
+    shutil.rmtree(out_folder, ignore_errors=True)
+    Path(out_folder).mkdir(parents=True, exist_ok=True)
     print("Starting generation")
     all_images = []
     batch_size = config.batch_size
@@ -103,6 +109,10 @@ def generate(n=1000):
         gen = model.decode(z)
         gen = gen.detach().cpu()
         all_images.extend([gen[x].numpy() for x in range(gen.size(0))])
-    print("Generation done")
+
+    print("Generation done, saving images..")
+    for i, image in enumerate(all_images):
+        file_name = os.path.join(out_folder, "{}.png".format(i))
+        save_image(image, file_name)
 
 generate()
