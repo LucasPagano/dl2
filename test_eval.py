@@ -94,15 +94,16 @@ def generate(n=1000):
     out_folder = "out/" + str(run_id)
     shutil.rmtree(out_folder, ignore_errors=True)
     Path(out_folder).mkdir(parents=True, exist_ok=True)
-    out_mnist = "datasets/MNIST/full"
+    out_mnist = "datasets/MNIST/full2"
     cpt = 0
     if not os.path.exists(out_mnist):
         print("Saving mnist test images")
         Path(out_mnist).mkdir(parents=True, exist_ok=True)
-        for i, (batch_images, _) in enumerate(dataloader):
-            for j in range(batch_images.size(0)):
-                save_image(batch_images[j], os.path.join(out_mnist, "{}.png".format(cpt)))
-                cpt += 1
+        while cpt < 1000:
+            for i, (batch_images, _) in enumerate(dataloader):
+                for j in range(batch_images.size(0)):
+                    save_image(batch_images[j], os.path.join(out_mnist, "{}.png".format(cpt)))
+                    cpt += 1
 
     print("Starting generation")
     all_images = []
