@@ -10,8 +10,9 @@ import matplotlib.pyplot as plt
 import torchvision
 import wandb
 from utils import Dotdict
-
+import pytorch_fid
 from zoo import BVAE
+
 import numpy as np
 import copy
 
@@ -93,6 +94,16 @@ def generate(n=1000):
     out_folder = "out/" + str(run_id)
     shutil.rmtree(out_folder, ignore_errors=True)
     Path(out_folder).mkdir(parents=True, exist_ok=True)
+    out_mnist = "datasets/MNIST/full"
+    cpt = 0
+    if not os.path.exists(out_mnist):
+        print("Saving mnist test images")
+        Path(out_mnist).mkdir(parents=True, exist_ok=True)
+        for i, (batch_images, _) in enumerate(dataloader):
+            for j in range(batch_images.size(0)):
+                save_image(batch_images[j], os.path.join(out_mnist, "{}".format(cpt)))
+                cpt += 1
+
     print("Starting generation")
     all_images = []
     batch_size = config.batch_size
@@ -114,5 +125,6 @@ def generate(n=1000):
     for i, image in enumerate(all_images):
         file_name = os.path.join(out_folder, "{}.png".format(i))
         save_image(image, file_name)
+
 
 generate()
