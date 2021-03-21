@@ -12,7 +12,7 @@ from zoo import BVAE
 import numpy as np
 import copy
 
-run_id = "3slsgtrb"
+run_id = "jvjs5f6l"
 nb_examples = 5
 
 wandb.init(project="eval-vae")
@@ -96,7 +96,7 @@ def generate(n=1000):
         z = torch.randn(batch_size, config.latent_size).to(device)
         # add class
         one_hot = torch.zeros(batch_size, 10).to(device)
-        index = torch.random.randint(10, (batch_size, 1))
+        index = torch.randint(10, (batch_size, 1)).to(device)
         one_hot = one_hot.scatter(1, index, 1)
         z = torch.cat((z, one_hot), dim=1)
         # generate images
