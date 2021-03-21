@@ -108,7 +108,7 @@ def generate(n=1000):
         # generate images
         gen = model.decode(z)
         gen = gen.detach().cpu()
-        all_images.extend([gen[x].numpy() for x in range(gen.size(0))])
+        all_images.extend([gen[x] for x in range(gen.size(0))])
 
     print("Generation done, saving images..")
     for i, image in enumerate(all_images):
