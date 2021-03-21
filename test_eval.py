@@ -91,6 +91,9 @@ def plot_test_set():
 
 
 def generate(n=1000):
+    class Found(Exception):
+        pass
+
     out_folder = "out/" + str(run_id)
     shutil.rmtree(out_folder, ignore_errors=True)
     Path(out_folder).mkdir(parents=True, exist_ok=True)
@@ -99,11 +102,15 @@ def generate(n=1000):
     if not os.path.exists(out_mnist):
         print("Saving mnist test images")
         Path(out_mnist).mkdir(parents=True, exist_ok=True)
-        while cpt < 1000:
+        try:
             for i, (batch_images, _) in enumerate(dataloader):
                 for j in range(batch_images.size(0)):
                     save_image(batch_images[j], os.path.join(out_mnist, "{}.png".format(cpt)))
                     cpt += 1
+                    if cpt > 1000:
+                        raise Found
+        except Found:
+            pass
 
     print("Starting generation")
     all_images = []
