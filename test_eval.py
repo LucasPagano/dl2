@@ -43,6 +43,25 @@ dataloader = torch.utils.data.DataLoader(
 )
 
 
+def plot_mus():
+    print("starting to plot mus")
+    columns = ['mu1', 'mu2', 'class']
+    mus = pd.DataFrame(columns=columns)
+    for batch_images, classes_real in dataloader:
+        batch_images, classes_real = batch_images.to(device), classes_real.to(device)
+        classes = model.classifier(batch_images)
+        encoded = torch.cat((model.encode(batch_images), classes), dim=1)
+        encoded = model.mu_logvar(encoded)
+        mu = encoded[:, :model.z_dim]
+        to_add = torch.hstack((mu, classes_real.unsqueeze(-1)))
+        mus = mus.append(pd.DataFrame(to_add.detach().cpu().numpy(), columns=columns), ignore_index=True)
+
+    mus = mus.astype({"class": "category"})
+    fig, axes = plt.subplots()
+    sns.scatterplot(ax=axes, data=mus, x="mu1", y="mu2", hue="class")
+    wandb.log({"mu1 vs mu2": wandb.Image(plt)})
+
+
 def plot_test_set():
     cpt = 0
     imgs = []
@@ -67,23 +86,20 @@ def plot_test_set():
             sys.exit(0)
 
 
-def plot_mus():
-    print("starting to plot mus")
-    columns = ['mu1', 'mu2', 'class']
-    mus = pd.DataFrame(columns=columns)
-    for batch_images, classes_real in dataloader:
-        batch_images, classes_real = batch_images.to(device), classes_real.to(device)
-        classes = model.classifier(batch_images)
-        encoded = torch.cat((model.encode(batch_images), classes), dim=1)
-        encoded = model.mu_logvar(encoded)
-        mu = encoded[:, :model.z_dim]
-        to_add = torch.hstack((mu, classes_real.unsqueeze(-1)))
-        mus = mus.append(pd.DataFrame(to_add.detach().cpu().numpy(), columns=columns), ignore_index=True)
-
-    mus = mus.astype({"class": "category"})
-    fig, axes = plt.subplots()
-    sns.scatterplot(ax=axes, data=mus, x="mu1", y="mu2", hue="class")
-    wandb.log({"mu1 vs mu2": wandb.Image(plt)})
+def generate(n=1000):
+    cpt = 0
+    batch_size = config.batch_size
+    while cpt < n:
+        # generate batch size examples
+        # pick from random distribution
+        z = torch.randn(batch_size, config.latent_size).to(device)
+        # add class
+        one_hot = torch.zeros(batch_size, 10).to(device)
+        index = torch.random.randint(10, (batch_size, 1))
+        one_hot = one_hot.scatter(1, index, 1)
+        z = torch.cat((z, one_hot), dim=1)
+        # generate images
+        gen = model.decode(z)
 
 
-plot_mus()
+generate()

@@ -135,7 +135,6 @@ class BVAE(nn.Module):
             one_hot = torch.zeros(classes_real.size(0), self.classes_dim).to(classes_real.device)
             one_hot[torch.arange(classes_real.size(0)), classes_real] = 1
             embedded_class = self.embed_class(one_hot).view(-1, self.image_size, self.image_size).unsqueeze(1)
-            print(x.size())
             embedded_input = self.embed_data(x)
             x = torch.cat((embedded_input, embedded_class), dim=1)
         mu, log_var = self.encode(x)
@@ -144,6 +143,7 @@ class BVAE(nn.Module):
             z = torch.cat((z, one_hot), dim=1)
         x_recon = self.decode(z)
         return x_recon, mu, log_var
+            
 
     def get_loss(self, recon_x, x, mu, log_var):
         bce = F.binary_cross_entropy(recon_x.view(-1, 32, 32), x.view(-1, 32, 32), reduction="sum")
