@@ -101,7 +101,7 @@ def generate(n=1000):
         Path(out_mnist).mkdir(parents=True, exist_ok=True)
         for i, (batch_images, _) in enumerate(dataloader):
             for j in range(batch_images.size(0)):
-                save_image(batch_images[j], os.path.join(out_mnist, "{}".format(cpt)))
+                save_image(batch_images[j], os.path.join(out_mnist, "{}.png".format(cpt)))
                 cpt += 1
 
     print("Starting generation")
