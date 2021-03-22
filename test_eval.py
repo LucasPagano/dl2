@@ -19,19 +19,19 @@ import copy
 run_id = "3i490cg8"
 nb_examples = 5
 
-wandb.init(project="eval-infogan")
+wandb.init(project="eval-vae")
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 api = wandb.Api()
-run = api.run("lucas_p/infogan/{}".format(run_id))
+run = api.run("lucas_p/wandb-demo/{}".format(run_id))
 config = Dotdict(run.config)
 print(config)
 
 state = torch.load("./models/{}/model.pt".format(run_id))
 print(state.keys())
 print("Best epoch : {}".format(state["epoch"]))
-model = InfoGAN(config).to(device).eval()
+model = BVAE(config).to(device).eval()
 model.load_state_dict(state["state_dict"])
 wandb.watch(model)
 
