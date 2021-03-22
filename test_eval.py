@@ -90,14 +90,14 @@ def plot_test_set():
             sys.exit(0)
 
 
-def generate(n=5000):
+def generate(n=2000):
     class Found(Exception):
         pass
 
     out_folder = "out/" + str(run_id)
     shutil.rmtree(out_folder, ignore_errors=True)
     Path(out_folder).mkdir(parents=True, exist_ok=True)
-    out_mnist = "datasets/MNIST/full2"
+    out_mnist = "datasets/MNIST/full{}".format(n//1000)
     cpt = 0
     if not os.path.exists(out_mnist):
         print("Saving mnist test images")
