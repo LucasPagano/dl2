@@ -16,7 +16,7 @@ from zoo import BVAE, InfoGAN
 import numpy as np
 import copy
 
-run_id = "11x2nzv1"
+run_id = "3i490cg8"
 nb_examples = 5
 
 wandb.init(project="eval-infogan")
@@ -162,4 +162,4 @@ def generate_infoGAN(n=10000):
             break
 
 
-generate_infoGAN()
+generate_vae()
