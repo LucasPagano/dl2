@@ -24,7 +24,7 @@ wandb.init(project="eval-infogan")
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
 api = wandb.Api()
-run = api.run("lucas_p/wandb-demo/{}".format(run_id))
+run = api.run("lucas_p/train-infogan/{}".format(run_id))
 config = Dotdict(run.config)
 print(config)
 
