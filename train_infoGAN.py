@@ -1,4 +1,6 @@
 import os
+import shutil
+from pathlib import Path
 
 import torch
 import numpy as np
@@ -28,6 +30,8 @@ torch.manual_seed(config.seed)
 np.random.seed(config.seed)
 
 model_dir = os.path.join("./models", run.id)
+shutil.rmtree(model_dir, ignore_errors=True)
+Path(model_dir).mkdir(parents=True, exist_ok=True)
 
 use_cuda = not config.no_cuda and torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
