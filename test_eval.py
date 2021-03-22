@@ -11,15 +11,15 @@ import torchvision
 import wandb
 from utils import Dotdict
 import pytorch_fid
-from zoo import BVAE
+from zoo import BVAE, InfoGAN
 
 import numpy as np
 import copy
 
-run_id = "jvjs5f6l"
+run_id = "11x2nzv1"
 nb_examples = 5
 
-wandb.init(project="eval-vae")
+wandb.init(project="eval-infogan")
 
 use_cuda = torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
@@ -31,7 +31,7 @@ print(config)
 state = torch.load("./models/{}/model.pt".format(run_id))
 print(state.keys())
 print("Best epoch : {}".format(state["epoch"]))
-model = BVAE(config).to(device).eval()
+model = InfoGAN(config).to(device).eval()
 model.load_state_dict(state["state_dict"])
 wandb.watch(model)
 
@@ -90,7 +90,7 @@ def plot_test_set():
             sys.exit(0)
 
 
-def generate(n=10000):
+def generate_vae(n=10000):
     out_folder = "out/" + str(run_id)
     shutil.rmtree(out_folder, ignore_errors=True)
     Path(out_folder).mkdir(parents=True, exist_ok=True)
@@ -130,4 +130,36 @@ def generate(n=10000):
             break
 
 
-generate()
+def generate_infoGAN(n=10000):
+    out_folder = "out/" + str(run_id)
+    shutil.rmtree(out_folder, ignore_errors=True)
+    Path(out_folder).mkdir(parents=True, exist_ok=True)
+    print("Starting generation")
+    all_images = []
+    batch_size = config.batch_size
+    while len(all_images) < n:
+        # generate batch size examples
+        # pick from random distribution
+        fix_noise = torch.Tensor(config.batch_size, 62).uniform_(-1, 1).to(device)
+        z = torch.randn(batch_size, 2).to(device)
+        # add class
+        one_hot = torch.zeros(batch_size, 10).to(device)
+        index = torch.randint(10, (batch_size, 1)).to(device)
+        one_hot = one_hot.scatter(1, index, 1)
+        z = torch.cat([fix_noise, one_hot, z], dim=1).view(batch_size, 74, 1, 1)
+        # generate images
+        gen = model.generator(z)
+        gen = gen.detach().cpu()
+        all_images.extend([gen[x] for x in range(gen.size(0))])
+
+    print("Generation done, saving images..")
+    for i, image in enumerate(all_images):
+        file_name = os.path.join(out_folder, "{}.png".format(i))
+        save_image(image, file_name)
+        if i < 10:
+            wandb.log({"img/{}".format(i): wandb.Image(image)})
+        if i == n:
+            break
+
+
+generate_infoGAN()
