@@ -90,28 +90,19 @@ def plot_test_set():
             sys.exit(0)
 
 
-def generate(n=2000):
-    class Found(Exception):
-        pass
-
+def generate(n=10000):
     out_folder = "out/" + str(run_id)
     shutil.rmtree(out_folder, ignore_errors=True)
     Path(out_folder).mkdir(parents=True, exist_ok=True)
-    out_mnist = "datasets/MNIST/full{}".format(n//1000)
+    out_mnist = "datasets/MNIST/full{}".format(n // 1000)
     cpt = 0
     if not os.path.exists(out_mnist):
         print("Saving mnist test images")
         Path(out_mnist).mkdir(parents=True, exist_ok=True)
-        try:
-            for i, (batch_images, _) in enumerate(dataloader):
-                for j in range(batch_images.size(0)):
-                    save_image(batch_images[j], os.path.join(out_mnist, "{}.png".format(cpt)))
-                    cpt += 1
-                    if cpt > n:
-                        raise Found
-        except Found:
-            pass
-
+        for i, (batch_images, _) in enumerate(dataloader):
+            for j in range(batch_images.size(0)):
+                save_image(batch_images[j], os.path.join(out_mnist, "{}.png".format(cpt)))
+                
     print("Starting generation")
     all_images = []
     batch_size = config.batch_size
@@ -134,7 +125,7 @@ def generate(n=2000):
         file_name = os.path.join(out_folder, "{}.png".format(i))
         save_image(image, file_name)
         if i < 10:
-            wandb.log({"img/{}".format(i) : wandb.Image(image)})
+            wandb.log({"img/{}".format(i): wandb.Image(image)})
 
 
 generate()
