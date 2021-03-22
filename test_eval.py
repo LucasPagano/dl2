@@ -90,7 +90,7 @@ def plot_test_set():
             sys.exit(0)
 
 
-def generate(n=1000):
+def generate(n=5000):
     class Found(Exception):
         pass
 
@@ -107,7 +107,7 @@ def generate(n=1000):
                 for j in range(batch_images.size(0)):
                     save_image(batch_images[j], os.path.join(out_mnist, "{}.png".format(cpt)))
                     cpt += 1
-                    if cpt > 1000:
+                    if cpt > n:
                         raise Found
         except Found:
             pass
@@ -133,6 +133,8 @@ def generate(n=1000):
     for i, image in enumerate(all_images):
         file_name = os.path.join(out_folder, "{}.png".format(i))
         save_image(image, file_name)
+        if i < 10:
+            wandb.log({"img/{}".format(i) : wandb.Image(image)})
 
 
 generate()
