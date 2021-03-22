@@ -102,7 +102,7 @@ def generate(n=10000):
         for i, (batch_images, _) in enumerate(dataloader):
             for j in range(batch_images.size(0)):
                 save_image(batch_images[j], os.path.join(out_mnist, "{}.png".format(cpt)))
-                
+
     print("Starting generation")
     all_images = []
     batch_size = config.batch_size
@@ -126,6 +126,8 @@ def generate(n=10000):
         save_image(image, file_name)
         if i < 10:
             wandb.log({"img/{}".format(i): wandb.Image(image)})
+        if i == n:
+            break
 
 
 generate()
