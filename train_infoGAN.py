@@ -1,3 +1,5 @@
+import os
+
 import torch
 import numpy as np
 import torchvision
@@ -24,6 +26,8 @@ config = wandb.config
 print(config)
 torch.manual_seed(config.seed)
 np.random.seed(config.seed)
+
+model_dir = os.path.join("./models", run.id)
 
 use_cuda = not config.no_cuda and torch.cuda.is_available()
 device = torch.device("cuda" if use_cuda else "cpu")
@@ -67,7 +71,6 @@ for epoch in range(config.epochs):
     total_G_loss = 0
     total_D_loss = 0
     for num_iters, batch_data in enumerate(dataloader, 0):
-
         ## Discriminator part : maximize log(D(x)) + log(1 - D(G(z)))
         # real part
         optimD.zero_grad()
@@ -141,6 +144,11 @@ for epoch in range(config.epochs):
         to_log["images/epoch{}_c1".format(epoch)] = grid1
         to_log["images/epoch{}_c2".format(epoch)] = grid2
         images_log_all.extend([grid1, grid2])
+
+        # save model
+        torch.save({
+            "epoch": epoch,
+            "state_dict": infoGAN.state_dict(),
+        }, os.path.join(model_dir, "model{}.pt".format(epoch)))
     wandb.log(to_log)
 wandb.log({"img_all": images_log_all})
-
